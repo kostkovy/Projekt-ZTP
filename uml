@@ -1,0 +1,124 @@
+@startuml
+
+title "Tower Defense v4.0 - Factory & Prototype (Fixed)"
+skinparam linetype ortho
+skinparam nodesep 100
+skinparam ranksep 60
+skinparam backgroundColor #FFFFFF
+skinparam packageStyle rectangle
+skinparam classAttributeIconSize 0
+
+' ==========================================
+' UI LAYER
+' ==========================================
+package "UI Layer" {
+    class TowerDefenseGame {
+        + {static} main(args: String[]): void
+    }
+    class GamePanel {
+        - gm: GameManager
+        - waveManager: WaveManager
+        - selectedTowerType: String
+        + handleClick(x: int, y: int): void
+        # paintComponent(g: Graphics): void
+    }
+}
+
+' ==========================================
+' CORE LOGIC (SINGLETON & STATE)
+' ==========================================
+package "Core Logic" {
+    enum GameState {
+        MENU
+        PREP
+        WAVE
+        OVER
+    }
+
+    class GameManager <<Singleton>> {
+        + {static} getInstance(): GameManager
+        + state: GameState
+        + enemies: List<Enemy>
+        + towers: List<Tower>
+    }
+
+    class WaveManager {
+        + startWave(): void
+        - spawnEnemy(): void
+    }
+}
+
+' ==========================================
+' PATTERN: FACTORY METHOD
+' ==========================================
+package "Factory Pattern" {
+    class TowerFactory <<Factory>> {
+        + {static} createTower(type: String, x: int, y: int): Tower
+    }
+}
+
+' ==========================================
+' PATTERN: PROTOTYPE
+' ==========================================
+package "Prototype Pattern" {
+    interface Prototype {
+        + clone(): Prototype
+    }
+
+    class EnemyCache {
+        - {static} cache: Map<String, Enemy>
+        + {static} loadCache(): void
+        + {static} getEnemy(type: String): Enemy
+    }
+}
+
+' ==========================================
+' ENTITIES
+' ==========================================
+package "Entities" {
+    class Enemy implements Prototype {
+        + typeId: String
+        + hp: int
+        + clone(): Prototype
+        + update(): void
+    }
+    
+    class Tower {
+        + name: String
+        + range: int
+        + update(): void
+    }
+    
+    class Projectile {
+        + update(): void
+    }
+}
+
+' ==========================================
+' RELACJE
+' ==========================================
+TowerDefenseGame *-- GamePanel
+GamePanel --> GameManager
+GamePanel *-- WaveManager
+
+' Factory usage
+GamePanel ..> TowerFactory : requests creation
+TowerFactory ..> Tower : creates new
+
+' Prototype usage
+WaveManager ..> EnemyCache : requests clone
+EnemyCache o-- Enemy : stores templates
+EnemyCache ..> Enemy : returns clone
+
+' Core relations
+GameManager o-- GameState
+GameManager o-- "*" Enemy
+GameManager o-- "*" Tower
+
+' Layout Hacks (Wymuszenie układu)
+"UI Layer" -[hidden]right-> "Core Logic"
+"Core Logic" -[hidden]right-> "Factory Pattern"
+"Factory Pattern" -[hidden]right-> "Prototype Pattern"
+"Prototype Pattern" -[hidden]down-> "Entities"
+
+@enduml
