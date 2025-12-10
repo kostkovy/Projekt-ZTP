@@ -1,124 +1,121 @@
 @startuml
 
-title "Tower Defense v4.0 - Factory & Prototype (Fixed)"
-skinparam linetype ortho
-skinparam nodesep 100
-skinparam ranksep 60
+title "Tower Defense v5.0 - 6 Design Patterns"
+' Usuniecie linetype ortho naprawia blad GraphViz
+skinparam ranksep 50
+skinparam nodesep 50
 skinparam backgroundColor #FFFFFF
 skinparam packageStyle rectangle
-skinparam classAttributeIconSize 0
 
 ' ==========================================
-' UI LAYER
+' 1. PATTERN: SINGLETON (Creational)
 ' ==========================================
-package "UI Layer" {
-    class TowerDefenseGame {
-        + {static} main(args: String[]): void
-    }
-    class GamePanel {
-        - gm: GameManager
-        - waveManager: WaveManager
-        - selectedTowerType: String
-        + handleClick(x: int, y: int): void
-        # paintComponent(g: Graphics): void
-    }
-}
-
-' ==========================================
-' CORE LOGIC (SINGLETON & STATE)
-' ==========================================
-package "Core Logic" {
-    enum GameState {
-        MENU
-        PREP
-        WAVE
-        OVER
-    }
-
+package "Singleton Pattern" {
     class GameManager <<Singleton>> {
         + {static} getInstance(): GameManager
         + state: GameState
-        + enemies: List<Enemy>
-        + towers: List<Tower>
-    }
-
-    class WaveManager {
-        + startWave(): void
-        - spawnEnemy(): void
+        + money: int
+        + lives: int
     }
 }
 
 ' ==========================================
-' PATTERN: FACTORY METHOD
+' 2. PATTERN: FACTORY METHOD (Creational)
 ' ==========================================
 package "Factory Pattern" {
-    class TowerFactory <<Factory>> {
-        + {static} createTower(type: String, x: int, y: int): Tower
+    class TowerFactory {
+        + {static} createTower(type: String): ITower
     }
 }
 
 ' ==========================================
-' PATTERN: PROTOTYPE
+' 3. PATTERN: PROTOTYPE (Creational)
 ' ==========================================
 package "Prototype Pattern" {
     interface Prototype {
         + clone(): Prototype
     }
-
+    class Enemy implements Prototype {
+        + clone(): Prototype
+    }
     class EnemyCache {
-        - {static} cache: Map<String, Enemy>
-        + {static} loadCache(): void
         + {static} getEnemy(type: String): Enemy
     }
 }
 
 ' ==========================================
-' ENTITIES
+' 4. PATTERN: DECORATOR (Structural)
 ' ==========================================
-package "Entities" {
-    class Enemy implements Prototype {
-        + typeId: String
-        + hp: int
-        + clone(): Prototype
+package "Decorator Pattern" {
+    interface ITower {
         + update(): void
+        + draw(g: Graphics2D): void
+        + getDamage(): int
     }
     
-    class Tower {
-        + name: String
-        + range: int
-        + update(): void
+    class Tower implements ITower {
+        - damage: int
     }
     
-    class Projectile {
-        + update(): void
+    abstract class TowerDecorator implements ITower {
+        # wrappedTower: ITower
+    }
+    
+    class UpgradeDecorator extends TowerDecorator {
+        + getDamage(): int
+        + draw(g: Graphics2D): void
     }
 }
 
 ' ==========================================
-' RELACJE
+' 5. PATTERN: COMMAND (Behavioral)
 ' ==========================================
-TowerDefenseGame *-- GamePanel
-GamePanel --> GameManager
-GamePanel *-- WaveManager
+package "Command Pattern" {
+    interface IGameCommand {
+        + execute(): void
+    }
+    
+    class BuyTowerCommand implements IGameCommand {
+        - type: String
+        + execute(): void
+    }
+    
+    class StartWaveCommand implements IGameCommand {
+        + execute(): void
+    }
+}
 
-' Factory usage
-GamePanel ..> TowerFactory : requests creation
-TowerFactory ..> Tower : creates new
+' ==========================================
+' 6. PATTERN: OBSERVER (Behavioral)
+' ==========================================
+package "Observer Pattern" {
+    interface GameObserver {
+        + onGameUpdate(): void
+    }
+    ' GameManager implements logic within itself but manages observers
+}
 
-' Prototype usage
-WaveManager ..> EnemyCache : requests clone
-EnemyCache o-- Enemy : stores templates
-EnemyCache ..> Enemy : returns clone
+' ==========================================
+' UI & LOGIC
+' ==========================================
+package "UI Layer" {
+    class GamePanel implements GameObserver {
+        - commands: Map<Rectangle, IGameCommand>
+        + paintComponent(g: Graphics): void
+    }
+    class WaveManager {
+        + startWave(): void
+    }
+}
 
-' Core relations
-GameManager o-- GameState
-GameManager o-- "*" Enemy
-GameManager o-- "*" Tower
-
-' Layout Hacks (Wymuszenie układu)
-"UI Layer" -[hidden]right-> "Core Logic"
-"Core Logic" -[hidden]right-> "Factory Pattern"
-"Factory Pattern" -[hidden]right-> "Prototype Pattern"
-"Prototype Pattern" -[hidden]down-> "Entities"
+' RELACJE
+GamePanel -down-> GameManager : observes & accesses
+GamePanel -right-> IGameCommand : triggers
+BuyTowerCommand ..> TowerFactory : uses
+TowerDecorator o-- ITower : wraps
+WaveManager ..> EnemyCache : uses
+GameManager o-- "*" ITower : stores
+GameManager o-- "*" Enemy : stores
+GameManager ..> GameObserver : notifies
 
 @enduml
