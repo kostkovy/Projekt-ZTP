@@ -1,0 +1,3 @@
+interface GameObserver {
+    void onGameUpdate();
+}
