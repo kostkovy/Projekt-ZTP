@@ -138,8 +138,8 @@ class SoundObserver implements GameObserver {
 //osiagniecia
 class AchievementObserver implements GameObserver {
     private Set<String> unlockedAchievements = new HashSet<>();
-    private int enemiesKilledCount = 0;
-    private int towersBuiltCount = 0;
+    protected int enemiesKilledCount = 0;
+    protected int towersBuiltCount = 0;
 
     @Override
     public void onGameEvent(GameEvent event) {
@@ -201,7 +201,7 @@ class AchievementObserver implements GameObserver {
         }
     }
 
-    private boolean unlock(String achievementId) {
+    protected boolean unlock(String achievementId) {
         if (!unlockedAchievements.contains(achievementId)) {
             unlockedAchievements.add(achievementId);
             return true;
@@ -215,6 +215,15 @@ class AchievementObserver implements GameObserver {
 
     public int getAchievementCount() {
         return unlockedAchievements.size();
+    }
+
+    // Getters for counters - needed for UI notifications
+    public int getEnemiesKilledCount() {
+        return enemiesKilledCount;
+    }
+
+    public int getTowersBuiltCount() {
+        return towersBuiltCount;
     }
 }
 
