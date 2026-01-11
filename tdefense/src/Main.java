@@ -9,7 +9,6 @@ public class Main extends JFrame {
     private LoggerObserver loggerObserver;
     private GamePanel panel;
     private GraphicsDevice device;
-    private boolean isFullscreen = true;
 
     public Main() {
         EnemyCache.loadCache();
@@ -26,7 +25,6 @@ public class Main extends JFrame {
         gm.addObserver(achievementObserver);
         gm.addObserver(loggerObserver);
 
-        // Get graphics device for fullscreen
         device = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
 
         this.setTitle("Tower Defense");
@@ -35,11 +33,11 @@ public class Main extends JFrame {
         this.setResizable(false);
 
         panel = new GamePanel();
+        panel.setObservers(statsObserver, loggerObserver, achievementObserver);
         gm.addObserver(panel);
 
         this.add(panel);
 
-        // Set fullscreen mode
         if (device.isFullScreenSupported()) {
             device.setFullScreenWindow(this);
         } else {
@@ -51,15 +49,17 @@ public class Main extends JFrame {
 
         setupKeyBindings();
 
-        System.out.println("\n╔════════════════════════════════════════╗");
+        System.out.println("\n╔═══════════════════════════════════════╗");
         System.out.println("║    🎮 TOWER DEFENSE - STEROWANIE 🎮    ║");
-        System.out.println("╠════════════════════════════════════════╣");
+        System.out.println("╠═══════════════════════════════════════╣");
         System.out.println("║ ESC - Wyjdź z gry                      ║");
-        System.out.println("║ S   - Pokaż statystyki                 ║");
-        System.out.println("║ L   - Pokaż logi                       ║");
+        System.out.println("║ S   - Pokaż statystyki (GRAFICZNIE)   ║");
+        System.out.println("║ L   - Pokaż logi (GRAFICZNIE)         ║");
         System.out.println("║ M   - Włącz/Wyłącz dźwięk             ║");
-        System.out.println("║ A   - Pokaż osiągnięcia                ║");
-        System.out.println("╚════════════════════════════════════════╝\n");
+        System.out.println("║ A   - Pokaż osiągnięcia (GRAFICZNIE)  ║");
+        System.out.println("║                                        ║");
+        System.out.println("║ 🏆 NOWOŚĆ: Fala 11 = ZIMOWA MAPA!     ║");
+        System.out.println("╚═══════════════════════════════════════╝\n");
     }
 
     private void setupKeyBindings() {
@@ -71,20 +71,16 @@ public class Main extends JFrame {
                         System.exit(0);
                         break;
                     case KeyEvent.VK_S:
-                        statsObserver.printStatistics();
+                        panel.toggleStatistics();
                         break;
                     case KeyEvent.VK_L:
-                        loggerObserver.printLog();
+                        panel.toggleLogs();
                         break;
                     case KeyEvent.VK_M:
                         soundObserver.setSoundEnabled(!soundObserver.isSoundEnabled());
                         break;
                     case KeyEvent.VK_A:
-                        System.out.println("\n🏆 ════════════════════════════════════");
-                        System.out.println("   OSIĄGNIĘCIA ODBLOKOWANE: " +
-                                achievementObserver.getAchievementCount());
-                        System.out.println("   " + achievementObserver.getUnlockedAchievements());
-                        System.out.println("🏆 ════════════════════════════════════\n");
+                        panel.toggleAchievements();
                         break;
                 }
             }
@@ -98,13 +94,11 @@ public class Main extends JFrame {
         }
     }
 
-    // Extended AchievementObserver that shows on-screen notifications
     private class AchievementObserverWithUI extends AchievementObserver {
         @Override
         public void onGameEvent(GameEvent event) {
             super.onGameEvent(event);
 
-            // Check for achievement unlocks and notify UI
             switch (event.type) {
                 case ENEMY_KILLED:
                     int enemyCount = getEnemiesKilledCount();
@@ -133,8 +127,18 @@ public class Main extends JFrame {
                             panel.showAchievement("Survivor", "Przetrwaj 5 fal");
                         } else if (wave == 10) {
                             panel.showAchievement("Veteran", "Przetrwaj 10 fal");
+                            panel.showAchievement("Winter Awaits", "Zimowa mapa w następnej fali!");
                         } else if (wave == 20) {
                             panel.showAchievement("Legend", "Przetrwaj 20 fal");
+                        }
+                    }
+                    break;
+
+                case WAVE_STARTED:
+                    if (event.data instanceof Integer) {
+                        int wave = (Integer) event.data;
+                        if (wave == 11 && unlock("winter_warrior")) {
+                            panel.showAchievement("Winter Warrior", "Osiągnij falę zimową!");
                         }
                     }
                     break;
