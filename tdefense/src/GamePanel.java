@@ -8,6 +8,7 @@ import java.util.HashMap;
 class GamePanel extends JPanel implements Runnable, GameObserver {
     private GameManager gm = GameManager.getInstance();
     private WaveManager waveManager = new WaveManager();
+    private TowerFactoryManager factoryManager = TowerFactoryManager.getInstance();
 
     private String selectedTowerType = "ARCHER";
     private int selectedTowerCost = 50, selectedTowerRange = 120;
@@ -17,7 +18,7 @@ class GamePanel extends JPanel implements Runnable, GameObserver {
     private Rectangle btnStartGame = new Rectangle(gm.MAP_WIDTH / 2 - 100, gm.MAP_HEIGHT / 2 + 50, 200, 60);
     private Rectangle btnRetry = new Rectangle(gm.MAP_WIDTH / 2 - 100, gm.MAP_HEIGHT / 2 + 50, 200, 60);
     private Rectangle btnStartWave = new Rectangle(gm.MAP_WIDTH - 220, gm.MAP_HEIGHT + 30, 200, 60);
-    private Rectangle[] shopButtons = new Rectangle[3];
+    private Rectangle[] shopButtons = new Rectangle[4]; // 4 wieże teraz
 
     // Mapa Komend (COMMAND PATTERN)
     private Map<Rectangle, IGameCommand> commands = new HashMap<>();
@@ -25,17 +26,22 @@ class GamePanel extends JPanel implements Runnable, GameObserver {
     public GamePanel() {
         this.setPreferredSize(new Dimension(gm.MAP_WIDTH, gm.MAP_HEIGHT + gm.UI_HEIGHT));
         this.setFocusable(true);
-        gm.addObserver(this); // Rejestracja obserwatora
+        gm.addObserver(this);
 
-        // Setup Shop Buttons
-        for (int i = 0; i < 3; i++) {
-            shopButtons[i] = new Rectangle(20 + (i * 140), gm.MAP_HEIGHT + 20, 120, 80);
+        // Setup Shop Buttons (4 wieże)
+        for (int i = 0; i < 4; i++) {
+            shopButtons[i] = new Rectangle(20 + (i * 120), gm.MAP_HEIGHT + 20, 100, 80);
         }
 
-        // Konfiguracja Komend (COMMAND PATTERN)
-        commands.put(shopButtons[0], new BuyTowerCommand(this, "ARCHER", 50, 120));
-        commands.put(shopButtons[1], new BuyTowerCommand(this, "CANNON", 120, 150));
-        commands.put(shopButtons[2], new BuyTowerCommand(this, "SNIPER", 250, 300));
+        // Konfiguracja Komend (COMMAND PATTERN) z użyciem Factory Manager
+        commands.put(shopButtons[0], new BuyTowerCommand(this, "ARCHER",
+                factoryManager.getTowerCost("ARCHER"), factoryManager.getTowerRange("ARCHER")));
+        commands.put(shopButtons[1], new BuyTowerCommand(this, "CANNON",
+                factoryManager.getTowerCost("CANNON"), factoryManager.getTowerRange("CANNON")));
+        commands.put(shopButtons[2], new BuyTowerCommand(this, "SNIPER",
+                factoryManager.getTowerCost("SNIPER"), factoryManager.getTowerRange("SNIPER")));
+        commands.put(shopButtons[3], new BuyTowerCommand(this, "LASER",
+                factoryManager.getTowerCost("LASER"), factoryManager.getTowerRange("LASER")));
         commands.put(btnStartWave, new StartWaveCommand(waveManager));
 
         MouseAdapter ma = new MouseAdapter() {
@@ -60,16 +66,15 @@ class GamePanel extends JPanel implements Runnable, GameObserver {
         this.selectedTowerRange = range;
     }
 
-    // OBSERVER PATTERN: Reakcja na zmiany w GameManager
     @Override
     public void onGameUpdate() {
-        // W prostym Swingu repaint() wystarczy
         repaint();
     }
 
     private void handleClick(MouseEvent e) {
         int x = e.getX();
         int y = e.getY();
+
         if (gm.state == GameState.MENU && btnStartGame.contains(x, y)) {
             gm.resetGame();
         } else if (gm.state == GameState.GAME_OVER && btnRetry.contains(x, y)) {
@@ -97,25 +102,29 @@ class GamePanel extends JPanel implements Runnable, GameObserver {
                     for (int i = 0; i < gm.towers.size(); i++) {
                         ITower t = gm.towers.get(i);
                         if (Math.abs(t.getX() - (c * gm.TILE_SIZE + gm.TILE_SIZE / 2)) < 20 &&
-                            Math.abs(t.getY() - (r * gm.TILE_SIZE + gm.TILE_SIZE / 2)) < 20) {
+                                Math.abs(t.getY() - (r * gm.TILE_SIZE + gm.TILE_SIZE / 2)) < 20) {
 
                             if (!(t instanceof UpgradeDecorator) && gm.money >= 100) {
                                 gm.spendMoney(100);
                                 gm.towers.set(i, new UpgradeDecorator(t));
+                                gm.towerUpgraded(100); // Powiadomienie
                                 System.out.println("Wieża ulepszona (Decorator Pattern)!");
                             }
                         }
                     }
                 }
-                // Lewy Przycisk Myszy -> BUDOWANIE (FACTORY PATTERN)
+                // Lewy Przycisk Myszy -> BUDOWANIE (FACTORY METHOD PATTERN)
                 else if (SwingUtilities.isLeftMouseButton(e) && !gm.occupiedMap[c][r]) {
                     if (gm.money >= selectedTowerCost) {
                         gm.spendMoney(selectedTowerCost);
                         int tx = c * gm.TILE_SIZE + gm.TILE_SIZE / 2;
                         int ty = r * gm.TILE_SIZE + gm.TILE_SIZE / 2;
-                        ITower t = TowerFactory.createTower(selectedTowerType, tx, ty);
+
+                        // UŻYCIE FACTORY METHOD PATTERN
+                        ITower t = factoryManager.createTower(selectedTowerType, tx, ty);
                         gm.towers.add(t);
                         gm.occupiedMap[c][r] = true;
+                        gm.towerBuilt(selectedTowerCost); // Powiadomienie
                     }
                 }
             }
@@ -153,6 +162,7 @@ class GamePanel extends JPanel implements Runnable, GameObserver {
                     gm.enemies.remove(e);
                 } else if (!e.alive) {
                     gm.addMoney(e.reward);
+                    gm.enemyKilled(e.reward); // Powiadomienie
                     gm.enemies.remove(e);
                 }
             }
@@ -240,10 +250,10 @@ class GamePanel extends JPanel implements Runnable, GameObserver {
             g.fillRect(x, y, gm.TILE_SIZE, gm.TILE_SIZE);
             g.setColor(Color.WHITE);
             g.drawOval(
-                x + gm.TILE_SIZE / 2 - selectedTowerRange,
-                y + gm.TILE_SIZE / 2 - selectedTowerRange,
-                selectedTowerRange * 2,
-                selectedTowerRange * 2
+                    x + gm.TILE_SIZE / 2 - selectedTowerRange,
+                    y + gm.TILE_SIZE / 2 - selectedTowerRange,
+                    selectedTowerRange * 2,
+                    selectedTowerRange * 2
             );
         }
     }
@@ -253,23 +263,24 @@ class GamePanel extends JPanel implements Runnable, GameObserver {
         g.fillRect(0, gm.MAP_HEIGHT, getWidth(), gm.UI_HEIGHT);
         g.setColor(Color.WHITE);
         g.setFont(new Font("Arial", Font.BOLD, 18));
-        g.drawString("MONEY: " + gm.money, 20, gm.MAP_HEIGHT + 30);
-        g.drawString("LIVES: " + gm.lives, 20, gm.MAP_HEIGHT + 60);
-        g.drawString("WAVE: " + gm.wave, 20, gm.MAP_HEIGHT + 90);
+        g.drawString("MONEY: " + gm.money, 500, gm.MAP_HEIGHT + 30);
+        g.drawString("LIVES: " + gm.lives, 500, gm.MAP_HEIGHT + 60);
+        g.drawString("WAVE: " + gm.wave, 500, gm.MAP_HEIGHT + 90);
         g.setFont(new Font("Arial", Font.PLAIN, 12));
-        g.drawString("(RMB on Tower to Upgrade - 100$)", 20, gm.MAP_HEIGHT + 110);
+        g.drawString("(RMB = Upgrade 100$)", 650, gm.MAP_HEIGHT + 30);
 
-        String[] names = {"ARCHER", "CANNON", "SNIPER"};
-        int[] costs = {50, 120, 250};
-        for (int i = 0; i < 3; i++) {
+        String[] names = {"ARCHER", "CANNON", "SNIPER", "LASER"};
+        int[] costs = {50, 120, 250, 80};
+        for (int i = 0; i < 4; i++) {
             boolean sel = selectedTowerType.equals(names[i]);
             g.setColor(sel ? Color.YELLOW : Color.GRAY);
             g.draw(shopButtons[i]);
             g.setColor(Color.WHITE);
-            g.setFont(new Font("Arial", Font.PLAIN, 12));
-            g.drawString(names[i], shopButtons[i].x + 10, shopButtons[i].y + 40);
-            g.drawString(costs[i] + "$", shopButtons[i].x + 10, shopButtons[i].y + 60);
+            g.setFont(new Font("Arial", Font.PLAIN, 11));
+            g.drawString(names[i], shopButtons[i].x + 5, shopButtons[i].y + 40);
+            g.drawString(costs[i] + "$", shopButtons[i].x + 5, shopButtons[i].y + 60);
         }
+
         g.setColor(gm.state == GameState.PREP_PHASE ? new Color(34, 139, 34) : Color.GRAY);
         g.fill(btnStartWave);
         g.setColor(Color.WHITE);
