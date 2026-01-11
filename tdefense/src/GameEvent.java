@@ -1,7 +1,4 @@
-/**
- * Enum reprezentujący różne zdarzenia w grze
- * Pozwala obserwatorom reagować tylko na konkretne zdarzenia
- */
+
 enum GameEventType {
     MONEY_CHANGED,
     LIVES_CHANGED,
@@ -14,9 +11,7 @@ enum GameEventType {
     GAME_RESET
 }
 
-/**
- * Klasa zdarzenia - zawiera typ i dodatkowe dane
- */
+
 class GameEvent {
     public final GameEventType type;
     public final Object data;

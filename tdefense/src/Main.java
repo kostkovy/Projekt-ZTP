@@ -7,13 +7,15 @@ public class Main extends JFrame {
     private AchievementObserver achievementObserver;
     private LoggerObserver loggerObserver;
 
+
+
+
     public Main() {
         EnemyCache.loadCache();
 
-        // Inicjalizacja GameManager
+
         GameManager gm = GameManager.getInstance();
 
-        // REJESTRACJA WSZYSTKICH OBSERWATORÓW
         statsObserver = new StatisticsObserver();
         soundObserver = new SoundObserver();
         achievementObserver = new AchievementObserver();
@@ -24,21 +26,12 @@ public class Main extends JFrame {
         gm.addObserver(achievementObserver);
         gm.addObserver(loggerObserver);
 
-        System.out.println("=== TOWER DEFENSE - Wzorce projektowe ===");
-        System.out.println("1. FACTORY METHOD - Abstrakcyjne fabryki wież");
-        System.out.println("2. OBSERVER - 5 obserwatorów (Panel, Stats, Sound, Achievement, Logger)");
-        System.out.println("3. DECORATOR - Ulepszanie wież");
-        System.out.println("4. COMMAND - Komendy UI");
-        System.out.println("5. PROTOTYPE - Klonowanie wrogów");
-        System.out.println("6. SINGLETON - GameManager");
-        System.out.println("==========================================\n");
-
-        this.setTitle("TowerDefense - Design Patterns Demo");
+        this.setTitle("TowerDefense");
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setResizable(false);
 
         GamePanel panel = new GamePanel();
-        gm.addObserver(panel); // Panel też jest obserwatorem
+        gm.addObserver(panel);
 
         this.add(panel);
         this.pack();
@@ -46,12 +39,11 @@ public class Main extends JFrame {
         this.setVisible(true);
         new Thread(panel).start();
 
-        // Opcjonalnie: można dodać menu do wyświetlania statystyk
         setupKeyBindings();
     }
 
     private void setupKeyBindings() {
-        // Klawisz S - pokaż statystyki
+
         KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(e -> {
             if (e.getID() == java.awt.event.KeyEvent.KEY_PRESSED) {
                 switch (e.getKeyCode()) {

@@ -2,17 +2,15 @@ import java.awt.Color;
 import java.util.HashMap;
 import java.util.Map;
 
-// ============================================================================
-// FACTORY METHOD PATTERN - Abstrakcyjna fabryka
-// ============================================================================
+
 abstract class TowerFactoryBase {
 
-    // Factory Method - metoda abstrakcyjna, którą implementują konkretne fabryki
+    // Factory Method
     public abstract ITower createTower(int x, int y);
 
-    // Template Method - wspólna logika dla wszystkich fabryk
+    // Template Method
     public ITower createTowerWithValidation(int x, int y, GameManager gm) {
-        // Walidacja pozycji
+     //walidacja
         int col = x / gm.TILE_SIZE;
         int row = y / gm.TILE_SIZE;
 
@@ -24,11 +22,11 @@ abstract class TowerFactoryBase {
             throw new IllegalArgumentException("Pole już zajęte!");
         }
 
-        // Wywołanie factory method
+
         return createTower(x, y);
     }
 
-    // Metody pomocnicze dla podklas
+
     protected abstract String getTowerName();
     protected abstract int getBaseDamage();
     protected abstract int getBaseRange();
@@ -36,9 +34,7 @@ abstract class TowerFactoryBase {
     protected abstract Color getTowerColor();
 }
 
-// ============================================================================
-// Konkretna fabryka dla wieży Łucznik
-// ============================================================================
+// lucznik
 class ArcherFactory extends TowerFactoryBase {
     @Override
     public ITower createTower(int x, int y) {
@@ -61,9 +57,7 @@ class ArcherFactory extends TowerFactoryBase {
     protected Color getTowerColor() { return new Color(30, 144, 255); }
 }
 
-// ============================================================================
-// Konkretna fabryka dla wieży Armata
-// ============================================================================
+//armata
 class CannonFactory extends TowerFactoryBase {
     @Override
     public ITower createTower(int x, int y) {
@@ -86,9 +80,7 @@ class CannonFactory extends TowerFactoryBase {
     protected Color getTowerColor() { return new Color(50, 50, 50); }
 }
 
-// ============================================================================
-// Konkretna fabryka dla wieży Snajper
-// ============================================================================
+//snajper
 class SniperFactory extends TowerFactoryBase {
     @Override
     public ITower createTower(int x, int y) {
@@ -111,9 +103,7 @@ class SniperFactory extends TowerFactoryBase {
     protected Color getTowerColor() { return new Color(148, 0, 211); }
 }
 
-// ============================================================================
-// NOWA WIEŻA - Fabryka dla wieży Laser (szybkostrzelna)
-// ============================================================================
+// laser
 class LaserFactory extends TowerFactoryBase {
     @Override
     public ITower createTower(int x, int y) {
@@ -136,9 +126,7 @@ class LaserFactory extends TowerFactoryBase {
     protected Color getTowerColor() { return new Color(0, 255, 255); }
 }
 
-// ============================================================================
-// Manager fabryk - rejestr wszystkich dostępnych fabryk wież
-// ============================================================================
+//zarzadanie
 class TowerFactoryManager {
     private static TowerFactoryManager instance;
     private Map<String, TowerFactoryBase> factories = new HashMap<>();

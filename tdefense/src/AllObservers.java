@@ -5,14 +5,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-/**
- * Plik zawierający wszystkie 4 obserwatory (oprócz GamePanel który już istnieje)
- * Możesz też rozdzielić to na osobne pliki jeśli wolisz
- */
 
-// ============================================================================
-// OBSERVER #1 - Obserwator statystyk gry
-// ============================================================================
+
+//statystki
 class StatisticsObserver implements GameObserver {
     private int totalEnemiesKilled = 0;
     private int totalTowersBuilt = 0;
@@ -66,10 +61,10 @@ class StatisticsObserver implements GameObserver {
         totalMoneyEarned = 0;
         totalMoneySpent = 0;
         totalWavesCompleted = 0;
-        // highestWaveReached nie resetujemy - to rekord
+        // highestWaveReached nie resetujemy
     }
 
-    // Gettery
+
     public int getTotalEnemiesKilled() { return totalEnemiesKilled; }
     public int getTotalTowersBuilt() { return totalTowersBuilt; }
     public int getTotalMoneyEarned() { return totalMoneyEarned; }
@@ -88,9 +83,7 @@ class StatisticsObserver implements GameObserver {
     }
 }
 
-// ============================================================================
-// OBSERVER #2 - Obserwator dźwięków
-// ============================================================================
+//dzwieki
 class SoundObserver implements GameObserver {
     private boolean soundEnabled = true;
 
@@ -130,7 +123,6 @@ class SoundObserver implements GameObserver {
     }
 
     private void playSound(String soundFile) {
-        // Symulacja - w rzeczywistości załadowałby i odtwarzał dźwięk
         System.out.println("[SOUND] Playing: " + soundFile);
     }
 
@@ -143,10 +135,7 @@ class SoundObserver implements GameObserver {
         return soundEnabled;
     }
 }
-
-// ============================================================================
-// OBSERVER #3 - Obserwator osiągnięć
-// ============================================================================
+//osiagniecia
 class AchievementObserver implements GameObserver {
     private Set<String> unlockedAchievements = new HashSet<>();
     private int enemiesKilledCount = 0;
@@ -229,9 +218,7 @@ class AchievementObserver implements GameObserver {
     }
 }
 
-// ============================================================================
-// OBSERVER #4 - Obserwator logów
-// ============================================================================
+//logi
 class LoggerObserver implements GameObserver {
     private List<String> eventLog = new ArrayList<>();
     private DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
