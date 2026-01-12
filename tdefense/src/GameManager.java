@@ -14,7 +14,7 @@ class GameManager {
     public final int UI_HEIGHT = 120;
 
     public GameState state = GameState.MENU;
-    public int money = 120, lives = 10, wave = 1;
+    public int money = 10000000, lives = 100, wave = 1;
 
     public boolean[][] occupiedMap;
     public List<Enemy> enemies = new CopyOnWriteArrayList<>();
@@ -118,7 +118,7 @@ class GameManager {
     }
 
     public void resetGame() {
-        money = 120; lives = 10; wave = 1; state = GameState.PREP_PHASE;
+        money = 10000000; lives = 100; wave = 1; state = GameState.PREP_PHASE;
         enemies.clear(); towers.clear(); projectiles.clear();
         occupiedMap = new boolean[COLS][ROWS];
         markPathAsOccupied();

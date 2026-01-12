@@ -38,8 +38,58 @@ class Enemy implements Prototype {
     }
 
     public void draw(Graphics2D g) {
-        g.setColor(color); g.fillOval((int)x - size, (int)y - size, size*2, size*2);
-        g.setColor(Color.RED); g.fillRect((int)x - 10, (int)y - size - 8, 20, 4);
-        g.setColor(Color.GREEN); g.fillRect((int)x - 10, (int)y - size - 8, (int)(20 * ((double)hp/maxHp)), 4);
+        GameManager gm = GameManager.getInstance();
+        boolean isWinter = gm.wave >= 11;
+
+        if (isWinter) {
+            // Zimowe kształty - różne dla każdego typu wroga
+            if (color.equals(new Color(135, 206, 250))) {
+                int[] xPoints = {(int)x, (int)x + size, (int)x, (int)x - size};
+                int[] yPoints = {(int)y - size, (int)y, (int)y + size, (int)y};
+                g.setColor(color);
+                g.fillPolygon(xPoints, yPoints, 4);
+                g.setColor(Color.WHITE);
+                g.drawPolygon(xPoints, yPoints, 4);
+            } else if (color.equals(new Color(70, 130, 180))) {
+                int[] xPoints = new int[6];
+                int[] yPoints = new int[6];
+                for (int i = 0; i < 6; i++) {
+                    double angle = Math.PI / 3 * i;
+                    xPoints[i] = (int)(x + size * Math.cos(angle));
+                    yPoints[i] = (int)(y + size * Math.sin(angle));
+                }
+                g.setColor(color);
+                g.fillPolygon(xPoints, yPoints, 6);
+                g.setColor(new Color(200, 220, 255));
+                g.drawPolygon(xPoints, yPoints, 6);
+            } else if (color.equals(new Color(176, 224, 230))) {
+                int[] xPoints = new int[8];
+                int[] yPoints = new int[8];
+                for (int i = 0; i < 8; i++) {
+                    double angle = Math.PI / 4 * i;
+                    int r = (i % 2 == 0) ? size : size / 2;
+                    xPoints[i] = (int)(x + r * Math.cos(angle));
+                    yPoints[i] = (int)(y + r * Math.sin(angle));
+                }
+                g.setColor(color);
+                g.fillPolygon(xPoints, yPoints, 8);
+                g.setColor(Color.WHITE);
+                g.drawPolygon(xPoints, yPoints, 8);
+            } else {
+                // Domyślny kształt
+                g.setColor(color);
+                g.fillOval((int)x - size, (int)y - size, size*2, size*2);
+            }
+        } else {
+            // Letnie kształty - koła jak wcześniej
+            g.setColor(color);
+            g.fillOval((int)x - size, (int)y - size, size*2, size*2);
+        }
+
+        // Pasek zdrowia
+        g.setColor(Color.RED);
+        g.fillRect((int)x - 10, (int)y - size - 8, 20, 4);
+        g.setColor(Color.GREEN);
+        g.fillRect((int)x - 10, (int)y - size - 8, (int)(20 * ((double)hp/maxHp)), 4);
     }
 }
