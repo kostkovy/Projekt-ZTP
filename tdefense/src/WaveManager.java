@@ -40,7 +40,6 @@ class WaveManager {
 
             Enemy e = EnemyCache.getEnemy(type);
 
-
             int healthBonus = calculateHealthBonus();
             e.buffHealth(healthBonus);
 
@@ -50,8 +49,15 @@ class WaveManager {
         }
 
         if (enemiesLeftToSpawn == 0 && gm.enemies.isEmpty()) {
-            gm.state = GameState.PREP_PHASE;
             gm.waveCompleted(gm.wave);
+
+            // Sprawdzenie czy gra się kończy po 20 falach
+            if (gm.wave >= 20) {
+                gm.state = GameState.GAME_OVER;
+                return;
+            }
+
+            gm.state = GameState.PREP_PHASE;
 
             int reward = calculateWaveReward();
             gm.addMoney(reward);

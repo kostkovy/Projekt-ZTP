@@ -370,11 +370,29 @@ class GamePanel extends JPanel implements Runnable, GameObserver {
         g.setColor(new Color(0, 0, 0, 200));
         g.fillRect(0, 0, gm.MAP_WIDTH, gm.MAP_HEIGHT + gm.UI_HEIGHT);
 
-        g.setFont(new Font("Arial", Font.BOLD, 70));
-        g.setColor(new Color(231, 76, 60, 150));
-        g.drawString("GAME OVER", gm.MAP_WIDTH / 2 - 215, gm.MAP_HEIGHT / 2 - 48);
-        g.setColor(new Color(231, 76, 60));
-        g.drawString("GAME OVER", gm.MAP_WIDTH / 2 - 220, gm.MAP_HEIGHT / 2 - 50);
+        // Sprawdzenie czy to wygrana (ukończono 20 fal)
+        boolean isVictory = gm.wave > 20;
+
+        if (isVictory) {
+            // Ekran po wygranej
+            g.setFont(new Font("Arial", Font.BOLD, 70));
+            g.setColor(new Color(46, 204, 113, 150));
+            g.drawString("WYGRANA!", gm.MAP_WIDTH / 2 - 185, gm.MAP_HEIGHT / 2 - 98);
+            g.setColor(new Color(46, 204, 113));
+            g.drawString("WYGRANA!", gm.MAP_WIDTH / 2 - 190, gm.MAP_HEIGHT / 2 - 100);
+
+            g.setFont(new Font("Arial", Font.BOLD, 30));
+            g.setColor(new Color(241, 196, 15));
+            g.drawString("Gratulacje! Ukończyłeś wszystkie 20 fal!",
+                    gm.MAP_WIDTH / 2 - 300, gm.MAP_HEIGHT / 2);
+        } else {
+            // Ekran po przegranej
+            g.setFont(new Font("Arial", Font.BOLD, 70));
+            g.setColor(new Color(231, 76, 60, 150));
+            g.drawString("GAME OVER", gm.MAP_WIDTH / 2 - 215, gm.MAP_HEIGHT / 2 - 48);
+            g.setColor(new Color(231, 76, 60));
+            g.drawString("GAME OVER", gm.MAP_WIDTH / 2 - 220, gm.MAP_HEIGHT / 2 - 50);
+        }
 
         g.setColor(new Color(230, 126, 34));
         g.fillRoundRect((int) btnRetry.getX(), (int) btnRetry.getY(),
