@@ -16,7 +16,7 @@ class GamePanel extends JPanel implements Runnable, GameObserver {
     private int selectedTowerCost = 50, selectedTowerRange = 120;
     private int mouseX, mouseY;
 
-    // Scaling variables - poprawione
+    // Scaling variables
     private double scale = 1.0;
     private int offsetX = 0;
     private int offsetY = 0;
@@ -47,6 +47,18 @@ class GamePanel extends JPanel implements Runnable, GameObserver {
     // Command Pattern
     private Map<Rectangle, IGameCommand> commands = new HashMap<>();
 
+    // --- UPGRADE MENU VARIABLES (NOWE) ---
+    private boolean isUpgradeMenuOpen = false;
+    private ITower selectedTowerForUpgrade = null;
+    private int selectedTowerIndex = -1;
+    private int menuX = 0;
+    private int menuY = 0;
+
+    // Wymiary menu ulepszeń
+    private final int MENU_WIDTH = 160;
+    private final int MENU_HEIGHT = 100; // 3 opcje
+    private final int BUTTON_HEIGHT = 33;
+
     public GamePanel() {
         this.setFocusable(true);
         this.setBackground(new Color(34, 139, 34));
@@ -71,6 +83,7 @@ class GamePanel extends JPanel implements Runnable, GameObserver {
         MouseAdapter ma = new MouseAdapter() {
             @Override
             public void mouseMoved(MouseEvent e) {
+                // Przeliczamy pozycję myszy uwzględniając skalę
                 mouseX = (int) ((e.getX() - offsetX) / scale);
                 mouseY = (int) ((e.getY() - offsetY) / scale);
             }
@@ -91,10 +104,7 @@ class GamePanel extends JPanel implements Runnable, GameObserver {
         double scaleX = (double) screenWidth / gameWidth;
         double scaleY = (double) screenHeight / gameHeight;
 
-        // Używamy mniejszej skali aby zachować proporcje
         scale = Math.min(scaleX, scaleY);
-
-        // Ograniczamy maksymalną skalę aby gra nie była zbyt duża
         scale = Math.min(scale, 1.5);
 
         offsetX = (int) ((screenWidth - (gameWidth * scale)) / 2);
@@ -136,7 +146,6 @@ class GamePanel extends JPanel implements Runnable, GameObserver {
     public void onGameEvent(GameEvent event) {
         if (event.type == GameEventType.WAVE_STARTED && event.data instanceof Integer) {
             int wave = (Integer) event.data;
-            // Zmiana mapy po 10 falach
             if (wave == 11) {
                 triggerMapTransition();
             }
@@ -154,10 +163,36 @@ class GamePanel extends JPanel implements Runnable, GameObserver {
         achievementNotifications.add(new AchievementNotification(title, description));
     }
 
+    // --- ZMODYFIKOWANA METODA handleClick (OBSŁUGA MENU) ---
     private void handleClick(MouseEvent e) {
+        // Przeliczenie współrzędnych ekranu na współrzędne gry
         int x = (int) ((e.getX() - offsetX) / scale);
         int y = (int) ((e.getY() - offsetY) / scale);
 
+        // 1. OBSŁUGA KLIKNIĘĆ W MENU ULEPSZEŃ (PRIORYTET)
+        if (isUpgradeMenuOpen) {
+            // Sprawdź, czy kliknięto w obszar menu
+            if (x >= menuX && x <= menuX + MENU_WIDTH &&
+                    y >= menuY && y <= menuY + MENU_HEIGHT) {
+
+                int localY = y - menuY;
+
+                if (localY < BUTTON_HEIGHT) {
+                    applyUpgrade(0); // Damage
+                } else if (localY < BUTTON_HEIGHT * 2) {
+                    applyUpgrade(1); // Range
+                } else {
+                    applyUpgrade(2); // Fire Rate
+                }
+            }
+
+            // Każde kliknięcie (w menu lub poza nim) zamyka menu
+            isUpgradeMenuOpen = false;
+            selectedTowerForUpgrade = null;
+            return;
+        }
+
+        // 2. STANDARDOWA OBSŁUGA GRY (gdy menu zamknięte)
         if (gm.state == GameState.MENU && btnStartGame.contains(x, y)) {
             gm.resetGame();
         } else if (gm.state == GameState.GAME_OVER && btnRetry.contains(x, y)) {
@@ -176,22 +211,31 @@ class GamePanel extends JPanel implements Runnable, GameObserver {
 
             int c = x / gm.TILE_SIZE;
             int r = y / gm.TILE_SIZE;
-            if (c >= 0 && c < gm.COLS && r >= 0 && r < gm.ROWS) {
 
+            if (c >= 0 && c < gm.COLS && r >= 0 && r < gm.ROWS) {
+                // PRAWY PRZYCISK MYSZY - OTWIERANIE MENU
                 if (SwingUtilities.isRightMouseButton(e) && gm.occupiedMap[c][r]) {
                     for (int i = 0; i < gm.towers.size(); i++) {
                         ITower t = gm.towers.get(i);
                         if (Math.abs(t.getX() - (c * gm.TILE_SIZE + gm.TILE_SIZE / 2)) < 20 &&
                                 Math.abs(t.getY() - (r * gm.TILE_SIZE + gm.TILE_SIZE / 2)) < 20) {
 
-                            if (!(t instanceof UpgradeDecorator) && gm.money >= 100) {
-                                gm.spendMoney(100);
-                                gm.towers.set(i, new UpgradeDecorator(t));
-                                gm.towerUpgraded(100);
-                            }
+                            // Ustawiamy menu
+                            selectedTowerForUpgrade = t;
+                            selectedTowerIndex = i;
+                            menuX = x;
+                            menuY = y;
+
+                            // Zabezpieczenie przed wyjściem poza ekran
+                            if (menuX + MENU_WIDTH > gm.MAP_WIDTH) menuX = gm.MAP_WIDTH - MENU_WIDTH;
+                            if (menuY + MENU_HEIGHT > gm.MAP_HEIGHT) menuY = gm.MAP_HEIGHT - MENU_HEIGHT;
+
+                            isUpgradeMenuOpen = true;
+                            break;
                         }
                     }
                 }
+                // LEWY PRZYCISK MYSZY - STAWIANIE WIEŻY
                 else if (SwingUtilities.isLeftMouseButton(e) && !gm.occupiedMap[c][r]) {
                     if (gm.money >= selectedTowerCost) {
                         gm.spendMoney(selectedTowerCost);
@@ -205,6 +249,44 @@ class GamePanel extends JPanel implements Runnable, GameObserver {
                     }
                 }
             }
+        }
+    }
+
+    // --- LOGIKA APLIKOWANIA ULEPSZEŃ (NOWE) ---
+    private void applyUpgrade(int type) {
+        if (selectedTowerForUpgrade == null) return;
+
+        ITower upgradedTower = null;
+        int cost = 0;
+
+        switch (type) {
+            case 0: // Damage
+                if (gm.money >= 100) {
+                    upgradedTower = new DamageUpgradeDecorator(selectedTowerForUpgrade);
+                    cost = 100;
+                }
+                break;
+            case 1: // Range
+                if (gm.money >= 80) {
+                    upgradedTower = new RangeUpgradeDecorator(selectedTowerForUpgrade);
+                    cost = 80;
+                }
+                break;
+            case 2: // Fire Rate
+                if (gm.money >= 120) {
+                    upgradedTower = new FireRateUpgradeDecorator(selectedTowerForUpgrade);
+                    cost = 120;
+                }
+                break;
+        }
+
+        if (upgradedTower != null) {
+            gm.spendMoney(cost);
+            gm.towers.set(selectedTowerIndex, upgradedTower);
+            gm.towerUpgraded(cost);
+        } else {
+            // Opcjonalnie: Można tu dodać komunikat "Brak kasy" rysowany na ekranie
+            System.out.println("Niewystarczające środki na ulepszenie.");
         }
     }
 
@@ -228,7 +310,6 @@ class GamePanel extends JPanel implements Runnable, GameObserver {
     }
 
     private void update() {
-        // Update transition
         if (isTransitioning) {
             transitionFrame++;
             if (transitionFrame < TRANSITION_DURATION / 2) {
@@ -298,6 +379,11 @@ class GamePanel extends JPanel implements Runnable, GameObserver {
         } else {
             drawGame(g2);
             drawUI(g2);
+
+            // --- RYSOWANIE MENU ULEPSZEŃ (NA WIERZCHU) ---
+            if (isUpgradeMenuOpen) {
+                drawUpgradeMenu(g2);
+            }
         }
 
         // Map transition overlay
@@ -319,10 +405,50 @@ class GamePanel extends JPanel implements Runnable, GameObserver {
 
         drawAchievementNotifications(g2);
 
-        // Draw overlay panels
         if (showStatistics && statsObserver != null) drawStatisticsPanel(g2);
         if (showLogs && loggerObserver != null) drawLogsPanel(g2);
         if (showAchievements && achievementObserver != null) drawAchievementsPanel(g2);
+    }
+
+    // --- METODA RYSOWANIA MENU ULEPSZEŃ (NOWE) ---
+    private void drawUpgradeMenu(Graphics2D g) {
+        // Tło menu (półprzezroczyste czarne)
+        g.setColor(new Color(20, 20, 20, 230));
+        g.fillRoundRect(menuX, menuY, MENU_WIDTH, MENU_HEIGHT, 10, 10);
+
+        // Ramka
+        g.setColor(new Color(241, 196, 15));
+        g.setStroke(new BasicStroke(2));
+        g.drawRoundRect(menuX, menuY, MENU_WIDTH, MENU_HEIGHT, 10, 10);
+        g.setStroke(new BasicStroke(1));
+
+        // Linie oddzielające przyciski
+        g.setColor(new Color(100, 100, 100));
+        g.drawLine(menuX, menuY + BUTTON_HEIGHT, menuX + MENU_WIDTH, menuY + BUTTON_HEIGHT);
+        g.drawLine(menuX, menuY + BUTTON_HEIGHT * 2, menuX + MENU_WIDTH, menuY + BUTTON_HEIGHT * 2);
+
+        g.setFont(new Font("Arial", Font.BOLD, 12));
+
+        // Opcja 1: Damage
+        boolean canAffordDmg = gm.money >= 100;
+        g.setColor(canAffordDmg ? Color.WHITE : Color.GRAY);
+        g.drawString("💪 Atak (+25)", menuX + 10, menuY + 20);
+        g.setColor(canAffordDmg ? new Color(241, 196, 15) : Color.DARK_GRAY);
+        g.drawString("100$", menuX + 110, menuY + 20);
+
+        // Opcja 2: Range
+        boolean canAffordRng = gm.money >= 80;
+        g.setColor(canAffordRng ? Color.WHITE : Color.GRAY);
+        g.drawString("🎯 Zasięg (+50)", menuX + 10, menuY + 20 + BUTTON_HEIGHT);
+        g.setColor(canAffordRng ? new Color(241, 196, 15) : Color.DARK_GRAY);
+        g.drawString("80$", menuX + 110, menuY + 20 + BUTTON_HEIGHT);
+
+        // Opcja 3: Fire Rate
+        boolean canAffordSpd = gm.money >= 120;
+        g.setColor(canAffordSpd ? Color.WHITE : Color.GRAY);
+        g.drawString("⚡ Szybkość", menuX + 10, menuY + 20 + BUTTON_HEIGHT * 2);
+        g.setColor(canAffordSpd ? new Color(241, 196, 15) : Color.DARK_GRAY);
+        g.drawString("120$", menuX + 110, menuY + 20 + BUTTON_HEIGHT * 2);
     }
 
     private void drawMenu(Graphics2D g) {
@@ -370,11 +496,9 @@ class GamePanel extends JPanel implements Runnable, GameObserver {
         g.setColor(new Color(0, 0, 0, 200));
         g.fillRect(0, 0, gm.MAP_WIDTH, gm.MAP_HEIGHT + gm.UI_HEIGHT);
 
-        // Sprawdzenie czy to wygrana (ukończono 20 fal)
         boolean isVictory = gm.wave > 20;
 
         if (isVictory) {
-            // Ekran po wygranej
             g.setFont(new Font("Arial", Font.BOLD, 70));
             g.setColor(new Color(46, 204, 113, 150));
             g.drawString("WYGRANA!", gm.MAP_WIDTH / 2 - 185, gm.MAP_HEIGHT / 2 - 98);
@@ -386,7 +510,6 @@ class GamePanel extends JPanel implements Runnable, GameObserver {
             g.drawString("Gratulacje! Ukończyłeś wszystkie 20 fal!",
                     gm.MAP_WIDTH / 2 - 300, gm.MAP_HEIGHT / 2);
         } else {
-            // Ekran po przegranej
             g.setFont(new Font("Arial", Font.BOLD, 70));
             g.setColor(new Color(231, 76, 60, 150));
             g.drawString("GAME OVER", gm.MAP_WIDTH / 2 - 215, gm.MAP_HEIGHT / 2 - 48);
@@ -446,7 +569,7 @@ class GamePanel extends JPanel implements Runnable, GameObserver {
         }
 
         // Ghost Tower
-        if (mouseY < gm.MAP_HEIGHT && gm.state != GameState.GAME_OVER) {
+        if (mouseY < gm.MAP_HEIGHT && gm.state != GameState.GAME_OVER && !isUpgradeMenuOpen) {
             int c = mouseX / gm.TILE_SIZE;
             int r = mouseY / gm.TILE_SIZE;
             int x = c * gm.TILE_SIZE;
@@ -489,11 +612,9 @@ class GamePanel extends JPanel implements Runnable, GameObserver {
     }
 
     private void drawWinterBackground(Graphics2D g) {
-        // Snowy ground
         g.setColor(new Color(240, 248, 255));
         g.fillRect(0, 0, gm.MAP_WIDTH, gm.MAP_HEIGHT);
 
-        // Snowflakes and ice patches
         for (int x = 0; x < gm.MAP_WIDTH; x += 30) {
             for (int y = 0; y < gm.MAP_HEIGHT; y += 30) {
                 if (Math.random() > 0.8) {
@@ -533,7 +654,7 @@ class GamePanel extends JPanel implements Runnable, GameObserver {
 
         g.setFont(new Font("Arial", Font.PLAIN, 11));
         g.setColor(new Color(149, 165, 166));
-        g.drawString("PPM = Ulepsz (100$)", statsX + 180, statsY + 20);
+        g.drawString("PPM = Ulepsz (100-120$)", statsX + 180, statsY + 20);
 
         String[] names = {"🏹 ŁUCZNIK", "💣 ARMATA", "🎯 SNAJPER", "⚡ LASER"};
         int[] costs = {50, 120, 250, 80};
@@ -599,8 +720,6 @@ class GamePanel extends JPanel implements Runnable, GameObserver {
         g.drawString("▶ START WAVE", btnStartWave.x + 30, btnStartWave.y + 38);
     }
 
-    // KONTYNUACJA GamePanel.java
-
     private void drawStatBox(Graphics2D g, int x, int y, String label, String value, Color accentColor) {
         g.setFont(new Font("Arial", Font.BOLD, 12));
         g.setColor(new Color(149, 165, 166));
@@ -626,21 +745,17 @@ class GamePanel extends JPanel implements Runnable, GameObserver {
         int x = (getWidth() - panelWidth) / 2;
         int y = (getHeight() - panelHeight) / 2;
 
-        // Semi-transparent background
         g.setColor(new Color(0, 0, 0, 200));
         g.fillRoundRect(x, y, panelWidth, panelHeight, 20, 20);
 
-        // Border
         g.setColor(new Color(52, 152, 219));
         g.setStroke(new BasicStroke(3));
         g.drawRoundRect(x, y, panelWidth, panelHeight, 20, 20);
 
-        // Title
         g.setColor(new Color(52, 152, 219));
         g.setFont(new Font("Arial", Font.BOLD, 28));
         g.drawString("📊 STATYSTYKI", x + 20, y + 40);
 
-        // Stats content
         g.setFont(new Font("Arial", Font.PLAIN, 18));
         int yPos = y + 80;
         int lineHeight = 35;
@@ -675,7 +790,6 @@ class GamePanel extends JPanel implements Runnable, GameObserver {
             yPos += lineHeight;
         }
 
-        // Close hint
         g.setFont(new Font("Arial", Font.ITALIC, 14));
         g.setColor(new Color(150, 150, 150));
         g.drawString("Naciśnij 'S' aby zamknąć", x + 150, y + panelHeight - 20);
@@ -739,12 +853,10 @@ class GamePanel extends JPanel implements Runnable, GameObserver {
         g.setFont(new Font("Arial", Font.BOLD, 28));
         g.drawString("🏆 OSIĄGNIĘCIA", x + 20, y + 40);
 
-        // Achievement count
         g.setFont(new Font("Arial", Font.PLAIN, 16));
         g.setColor(new Color(200, 200, 200));
         g.drawString("Odblokowano: " + achievementObserver.getAchievementCount() + "/9", x + 20, y + 70);
 
-        // Achievement list
         String[][] achievements = {
                 {"first_blood", "First Blood", "Zabij 10 wrogów"},
                 {"slayer", "Slayer", "Zabij 50 wrogów"},
@@ -790,7 +902,6 @@ class GamePanel extends JPanel implements Runnable, GameObserver {
         g.drawString("Naciśnij 'A' aby zamknąć", x + 180, y + panelHeight - 20);
     }
 
-    // Inner class for achievement notifications
     private class AchievementNotification {
         private String title;
         private String description;
