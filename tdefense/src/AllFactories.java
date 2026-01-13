@@ -5,10 +5,10 @@ import java.util.Map;
 
 abstract class TowerFactoryBase {
 
-    // Factory Method
+    // Factory
     public abstract ITower createTower(int x, int y);
 
-    // Template Method
+    // wzor
     public ITower createTowerWithValidation(int x, int y, GameManager gm) {
      //walidacja
         int col = x / gm.TILE_SIZE;

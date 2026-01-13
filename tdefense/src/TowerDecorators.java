@@ -61,7 +61,10 @@ class FireRateUpgradeDecorator extends TowerDecorator {
 
     @Override
     public void update() {
-        // Wywołujemy update częściej (symulacja szybszego strzelania)
+
+        wrappedTower.update();
+        wrappedTower.update();
+        wrappedTower.update();
         wrappedTower.update();
     }
 
@@ -76,6 +79,7 @@ class FireRateUpgradeDecorator extends TowerDecorator {
         g.drawPolygon(xPoints, yPoints, 4);
         g.setStroke(new BasicStroke(1));
     }
+
 }
 
 // BACKWARD COMPATIBILITY: UpgradeDecorator to alias dla DamageUpgradeDecorator
