@@ -459,13 +459,10 @@ class GamePanel extends JPanel implements Runnable, GameObserver {
             g.setColor(can ? new Color(46, 204, 113, 150) : new Color(231, 76, 60, 150));
             g.setStroke(new BasicStroke(2));
             g.drawRoundRect(x + 2, y + 2, gm.TILE_SIZE - 4, gm.TILE_SIZE - 4, 10, 10);
-
-<<<<<<< Updated upstream
             g.setColor(can ? new Color(52, 152, 219, 100) : new Color(231, 76, 60, 100));
-=======
+
             // Range indicator
             g.setColor(can ? new Color(255, 255, 255, 181) : new Color(231, 76, 60, 100));
->>>>>>> Stashed changes
             g.setStroke(new BasicStroke(2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[]{9}, 0));
             g.drawOval(
                     x + gm.TILE_SIZE / 2 - selectedTowerRange,

@@ -20,7 +20,6 @@ class EnemyCache {
     public static Enemy getEnemy(String type) {
         Enemy prototype = cache.get(type);
         if (prototype == null) {
-            // Fallback do NORMAL jeśli typ nie istnieje
             prototype = cache.get("NORMAL");
         }
         return (Enemy) prototype.clone();

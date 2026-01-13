@@ -42,7 +42,7 @@ class Enemy implements Prototype {
         boolean isWinter = gm.wave >= 11;
 
         if (isWinter) {
-            // Zimowe kształty - różne dla każdego typu wroga
+            // mapa 2
             if (color.equals(new Color(135, 206, 250))) {
                 int[] xPoints = {(int)x, (int)x + size, (int)x, (int)x - size};
                 int[] yPoints = {(int)y - size, (int)y, (int)y + size, (int)y};
@@ -76,12 +76,12 @@ class Enemy implements Prototype {
                 g.setColor(Color.WHITE);
                 g.drawPolygon(xPoints, yPoints, 8);
             } else {
-                // Domyślny kształt
+                //
                 g.setColor(color);
                 g.fillOval((int)x - size, (int)y - size, size*2, size*2);
             }
         } else {
-            // Letnie kształty - koła jak wcześniej
+            // mapa 1 enemy
             g.setColor(color);
             g.fillOval((int)x - size, (int)y - size, size*2, size*2);
         }
