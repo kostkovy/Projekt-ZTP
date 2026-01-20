@@ -82,7 +82,7 @@ class FireRateUpgradeDecorator extends TowerDecorator {
 
 }
 
-// BACKWARD COMPATIBILITY: UpgradeDecorator to alias dla DamageUpgradeDecorator
+
 class UpgradeDecorator extends DamageUpgradeDecorator {
     public UpgradeDecorator(ITower tower) { super(tower); }
 }

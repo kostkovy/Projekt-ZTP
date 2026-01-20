@@ -374,7 +374,7 @@
         <div class="usage-box">
             <span class="usage-title"> Lokalizacja i użycie:</span>
             <strong>Definicja:</strong> GameObserver.java (interfejs), AllObservers.java (concrete observers), GameEvent.java (enum + klasa)<br>
-            <strong>Użycie - rejestracja:</strong> Main.java (linie 27-30): dodawanie obserwatorów do GameManager.<br>
+            <strong>Użycie - rejestracja:</strong> Main.java (linie 16-21): dodawanie obserwatorów do GameManager.<br>
             <strong>Użycie - powiadamianie:</strong><br>
             • GameManager.takeDamage() (linie 66-75): powiadomienie o zmianie żyć.<br>
             • GameManager.enemyKilled() (linie 77-79): powiadomienie o nagrodzie.<br>
@@ -433,12 +433,12 @@
         <div class="usage-box">
             <span class="usage-title"> Lokalizacja i użycie:</span>
             <strong>Definicja:</strong> AllFactories.java<br>
-            • TowerFactoryBase (linie 6-31) - klasa abstrakcyjna.<br>
-            • Konkretne fabryki: Archer (34-49), Cannon (52-67), Sniper (70-85), Laser (88-103).<br>
-            • TowerFactoryManager (linie 107-160) - zarządza fabrykami.<br>
+            • TowerFactoryBase (linie 6-27) - klasa abstrakcyjna.<br>
+            • Konkretne fabryki: Archer (38-59), Cannon (60-82), Sniper (84-104), Laser (107-128).<br>
+            • TowerFactoryManager (linie 130-180) - zarządza fabrykami.<br>
             <strong>Użycie:</strong><br>
-            • GamePanel.handleClick() (linie 190-200): tworzenie wieży wybranego typu.<br>
-            • TowerFactoryManager.registerDefaultFactories() (linie 120-125): rejestracja dostępnych fabryk.
+            • GamePanel.handleClick() (linie 167-253): tworzenie wieży wybranego typu.<br>
+            • TowerFactoryManager.registerDefaultFactories() (linie 146-151): rejestracja dostępnych fabryk.
         </div>
 
         <div class="diagram-box">
@@ -478,7 +478,7 @@
         <div class="mac-window">
             <div class="mac-header">
                 <div class="dots"><div class="dot red"></div><div class="dot yellow"></div></div>
-                <div class="filename">src/AllFactories.java (linie 52-67)</div>
+                <div class="filename">src/AllFactories.java (linie 38-58)</div>
             </div>
             <div class="code-content">
 <span class="kwd">class</span> <span class="cls">CannonFactory</span> <span class="kwd">extends</span> <span class="cls">TowerFactoryBase</span> {
@@ -520,10 +520,10 @@
             <span class="usage-title"> Lokalizacja i użycie:</span>
             <strong>Definicja:</strong> TowerDecorators.java<br>
             • TowerDecorator (linie 6-17) - bazowy dekorator<br>
-            • Konkretne dekoratory: Damage (19-35), Range (37-52), FireRate (55-78)<br>
+            • Konkretne dekoratory: Damage (19-35), Range (37-56), FireRate (58-83)<br>
             <strong>Użycie:</strong><br>
-            • GamePanel.applyUpgrade() (linie 275-312): tworzenie dekoratorów na podstawie wyboru gracza.<br>
-            • GamePanel.handleClick() (linie 180-185): wykrywanie kliknięcia PPM na wieży i otwieranie menu.
+            • GamePanel.applyUpgrade() (linie 256-290): tworzenie dekoratorów na podstawie wyboru gracza.<br>
+            • GamePanel.handleClick() (linie 217-230): wykrywanie kliknięcia PPM na wieży i otwieranie menu.
         </div>
 
         <div class="diagram-box">
@@ -624,7 +624,7 @@
             • Enemy.java (linie 20-23): implementacja clone().<br>
             • EnemyCache.java: cache prototypów i metoda getEnemy().<br>
             <strong>Użycie:</strong><br>
-            • Main.java (linia 13): EnemyCache.loadCache().<br>
+            • Main.java (linia 14): EnemyCache.loadCache().<br>
             • WaveManager.update() (linie 39-42): pobranie sklonowanego wroga.<br>
             • WaveManager.selectEnemyType() (linie 68-91): wybór typu wroga.
         </div>
@@ -694,7 +694,7 @@
             <div class="role-item"><span class="role-name">execute() (metoda wykonująca):</span> IGameCommand.execute()</div>
             <div class="role-item"><span class="role-name">Receiver (odbiorcy):</span> GamePanel (dla BuyTowerCommand), WaveManager (dla StartWaveCommand)</div>
             <div class="role-item"><span class="role-name">Invoker (wywoływacz):</span> GamePanel.handleClick() - wykonuje komendy z mapy commands</div>
-            <div class="role-item"><span class="role-name">Client (konfiguruje komendy):</span> GamePanel konstruktor (linie 69-79)</div>
+            <div class="role-item"><span class="role-name">Client (konfiguruje komendy):</span> GamePanel konstruktor (linie 69-82)</div>
         </div>
 
         <div class="usage-box">
@@ -706,7 +706,7 @@
             <strong>Użycie - konfiguracja:</strong><br>
             • GamePanel konstruktor (linie 69-79): mapowanie przycisków do komend.<br>
             <strong>Użycie - wykonanie:</strong><br>
-            • GamePanel.handleClick() (linie 167-175): pętla wykonująca komendę przypisaną do przycisku.
+            • GamePanel.handleClick() (linie 167-253): pętla wykonująca komendę przypisaną do przycisku.
         </div>
 
         <div class="diagram-box">
