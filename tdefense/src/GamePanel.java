@@ -163,13 +163,13 @@ class GamePanel extends JPanel implements Runnable, GameObserver {
         achievementNotifications.add(new AchievementNotification(title, description));
     }
 
-    // --- ZMODYFIKOWANA METODA handleClick (OBSŁUGA MENU) ---
+    // ---
     private void handleClick(MouseEvent e) {
         // Przeliczenie współrzędnych ekranu na współrzędne gry
         int x = (int) ((e.getX() - offsetX) / scale);
         int y = (int) ((e.getY() - offsetY) / scale);
 
-        // 1. OBSŁUGA KLIKNIĘĆ W MENU ULEPSZEŃ (PRIORYTET)
+
         if (isUpgradeMenuOpen) {
             // Sprawdź, czy kliknięto w obszar menu
             if (x >= menuX && x <= menuX + MENU_WIDTH &&
@@ -186,13 +186,13 @@ class GamePanel extends JPanel implements Runnable, GameObserver {
                 }
             }
 
-            // Każde kliknięcie (w menu lub poza nim) zamyka menu
+            // Każde kliknięcie poza menu zamyka menu
             isUpgradeMenuOpen = false;
             selectedTowerForUpgrade = null;
             return;
         }
 
-        // 2. STANDARDOWA OBSŁUGA GRY (gdy menu zamknięte)
+
         if (gm.state == GameState.MENU && btnStartGame.contains(x, y)) {
             gm.resetGame();
         } else if (gm.state == GameState.GAME_OVER && btnRetry.contains(x, y)) {
@@ -252,7 +252,7 @@ class GamePanel extends JPanel implements Runnable, GameObserver {
         }
     }
 
-    // --- LOGIKA APLIKOWANIA ULEPSZEŃ (NOWE) ---
+    // ulepszenia ---
     private void applyUpgrade(int type) {
         if (selectedTowerForUpgrade == null) return;
 
@@ -285,7 +285,6 @@ class GamePanel extends JPanel implements Runnable, GameObserver {
             gm.towers.set(selectedTowerIndex, upgradedTower);
             gm.towerUpgraded(cost);
         } else {
-            // Opcjonalnie: Można tu dodać komunikat "Brak kasy" rysowany na ekranie
             System.out.println("Niewystarczające środki na ulepszenie.");
         }
     }

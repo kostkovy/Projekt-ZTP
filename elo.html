@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dokumentacja Projektowa - Tower Defense</title>
+    <!-- Ładowanie Mermaid -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #e0e5ec;
+            --paper-color: #ffffff;
+            --text-main: #2d3436;
+            --text-muted: #636e72;
+            --accent: #0984e3;
+            --success: #00b894;
+            --code-bg: #282c34;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #555;
+            margin: 0;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--text-main);
+        }
+
+        .page {
+            width: 210mm;
+            min-height: 297mm;
+            background: var(--paper-color);
+            margin-bottom: 30px;
+            padding: 20mm;
+            box-sizing: border-box;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        @media print {
+            body { background: none; padding: 0; }
+            .page { margin: 0; box-shadow: none; page-break-after: always; height: auto; min-height: 297mm; }
+        }
+
+        h1 {
+            font-size: 22pt;
+            border-bottom: 3px solid var(--accent);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+
+        h2 { font-size: 14pt; margin-top: 25px; color: var(--accent); text-transform: uppercase; letter-spacing: 0.5px; border-left: 4px solid var(--accent); padding-left: 10px; }
+        h3 { font-size: 11pt; margin-top: 15px; color: #2d3436; font-weight: 700; }
+        
+        p, li { font-size: 10pt; line-height: 1.5; color: #444; text-align: justify; }
+        ul { padding-left: 20px; margin-top: 5px; }
+        li { margin-bottom: 4px; }
+
+        .diagram-box {
+            background: #f8f9fa;
+            border: 1px solid #dfe6e9;
+            border-radius: 8px;
+            padding: 10px;
+            margin: 15px 0;
+            display: flex;
+            justify-content: center;
+            overflow-x: auto;
+        }
+
+        .vector-box {
+            background-color: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 10px 15px;
+            margin: 10px 0;
+            border-radius: 0 5px 5px 0;
+        }
+        .vector-title { font-weight: bold; color: #1565c0; font-size: 10pt; display: block; margin-bottom: 5px; }
+
+        .roles-box {
+            background-color: #fff3e0;
+            border-left: 4px solid #ff9800;
+            padding: 10px 15px;
+            margin: 10px 0;
+            border-radius: 0 5px 5px 0;
+        }
+        .roles-title { font-weight: bold; color: #e65100; font-size: 10pt; display: block; margin-bottom: 8px; }
+        .role-item { margin: 5px 0; padding-left: 15px; }
+        .role-name { color: #f57c00; font-weight: 600; }
+
+        .work-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 10pt;
+        }
+        .work-table th, .work-table td {
+            border: 1px solid #dfe6e9;
+            padding: 8px;
+            text-align: left;
+        }
+        .work-table th { background-color: #f1f2f6; }
+
+        .mac-window {
+            background: var(--code-bg);
+            border-radius: 6px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+            margin: 10px 0;
+            overflow: hidden;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 8pt;
+            width: 100%;
+        }
+
+        .mac-header {
+            background: #21252b;
+            padding: 6px 12px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #181a1f;
+        }
+
+        .dots { display: flex; gap: 5px; margin-right: 15px; }
+        .dot { width: 8px; height: 8px; border-radius: 50%; }
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27c93f; }
+
+        .filename { color: #abb2bf; font-size: 8pt; opacity: 0.8; }
+
+        .code-content {
+            padding: 12px;
+            color: #abb2bf;
+            white-space: pre-wrap;
+            line-height: 1.3;
+        }
+
+        .kwd { color: #c678dd; } 
+        .str { color: #98c379; } 
+        .cls { color: #e5c07b; } 
+        .func { color: #61afef; } 
+        .com { color: #5c6370; font-style: italic; } 
+        .num { color: #d19a66; } 
+
+        .footer {
+            margin-top: auto;
+            border-top: 1px solid #eee;
+            padding-top: 10px;
+            font-size: 8pt;
+            color: #b2bec3;
+            text-align: right;
+        }
+
+        .usage-box {
+            background-color: #f3e5f5;
+            border-left: 4px solid #9c27b0;
+            padding: 10px 15px;
+            margin: 10px 0;
+            border-radius: 0 5px 5px 0;
+        }
+        .usage-title { font-weight: bold; color: #6a1b9a; font-size: 10pt; display: block; margin-bottom: 5px; }
+    </style>
+</head>
+<body>
+
+    <!-- STRONA 1: TYTUŁ, AUTORZY, TECHNOLOGIE -->
+    <div class="page">
+        <div style="text-align: center; margin-bottom: 30px;">
+            <h1 style="border: none; font-size: 28pt; margin-bottom: 10px;">Projekt: Tower Defense</h1>
+            <p style="font-size: 14pt; color: var(--text-muted);">Dokumentacja Techniczna i Wzorce Projektowe</p>
+        </div>
+
+        <h2>1. Podział pracy w zespole</h2>
+        <table class="work-table">
+            <thead>
+                <tr>
+                    <th>Autor</th>
+                    <th>Zrealizowane zadania i moduły</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Piotr Czyżewski</strong></td>
+                    <td>
+                        <ul>
+                            <li>Implementacja wzorca <strong>Decorator</strong> (TowerDecorators.java) - system ulepszeń wież z wizualnymi wskaźnikami.</li>
+                            <li>Implementacja wzorca <strong>Factory Method</strong> (AllFactories.java) - mechanika tworzenia różnych typów wież (Łucznik, Armata, Snajper, Laser).</li>
+                            <li>Walidacja pozycji wież w TowerFactoryBase.createTowerWithValidation().</li>
+                        </ul>
+                    </td>
+                </tr>
+                <tr>
+                    <td><strong>Mikołaj Staniaszek</strong></td>
+                    <td>
+                        <ul>
+                            <li>Implementacja wzorca <strong>Command</strong> (IGameCommand, BuyTowerCommand, StartWaveCommand) - enkapsulacja akcji UI.</li>
+                            <li>Implementacja głównego panelu gry (GamePanel.java) z pętlą renderowania 60 FPS.</li>
+                            <li>System obsługi myszy i klawiatury, menu ulepszeń wież (PPM).</li>
+                            <li>Integracja interfejsu użytkownika z systemem komend przez mapę commands.</li>
+                        </ul>
+                    </td>
+                </tr>
+                <tr>
+                    <td><strong>Bartosz Składanowski</strong></td>
+                    <td>
+                        <ul>
+                            <li>Implementacja wzorca <strong>Observer</strong> (AllObservers.java) - system reagowania na zdarzenia gry.</li>
+                            <li>Klasy: StatisticsObserver, SoundObserver, AchievementObserver, LoggerObserver.</li>
+                            <li>Współpraca przy wzorcu <strong>Prototype</strong> - definicja interfejsu Prototype i klasy Enemy.</li>
+                            <li>System powiadomień o osiągnięciach z animacjami (AchievementNotification w GamePanel).</li>
+                        </ul>
+                    </td>
+                </tr>
+                <tr>
+                    <td><strong>Maciej Socik</strong></td>
+                    <td>
+                        <ul>
+                            <li>Implementacja wzorca <strong>Singleton</strong> (GameManager, TowerFactoryManager) - zarządcy stanu gry.</li>
+                            <li>Implementacja wzorca <strong>Prototype</strong> - cache przeciwników (EnemyCache.java) z mechanizmem klonowania.</li>
+                            <li>Zarządzanie falami przeciwników (WaveManager.java) z progresywnym skalowaniem trudności.</li>
+                            <li>System zdarzeń (GameEvent, GameEventType) dla wzorca Observer.</li>
+                            <li>Konfiguracja ścieżek na mapie i zarządzanie kolekcjami thread-safe (CopyOnWriteArrayList).</li>
+                        </ul>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>2. Specyfika rozwiązań technologicznych</h2>
+        <p>Projekt został zrealizowany w języku <strong>Java (JDK 17+)</strong> z wykorzystaniem biblioteki <strong>Swing</strong> oraz <strong>AWT</strong>.</p>
+        <ul>
+            <li><strong>Wątkowość (Threading):</strong> Gra wykorzystuje osobny wątek dla pętli logicznej (game loop) działającej w 60 FPS (GamePanel.run()), oddzielony od wątku renderowania UI (EDT - Event Dispatch Thread).</li>
+            <li><strong>Thread-Safety:</strong> Użyto kolekcji <code>CopyOnWriteArrayList</code> dla list <code>enemies</code>, <code>towers</code> i <code>projectiles</code> w GameManager, aby uniknąć <code>ConcurrentModificationException</code> podczas iteracji i modyfikacji w różnych wątkach.</li>
+            <li><strong>Graphics2D:</strong> Renderowanie oparte na <code>Graphics2D</code> z włączonym anti-aliasingiem (<code>RenderingHints.VALUE_ANTIALIAS_ON</code>) i transformacjami (scaling, translate) dla responsywnego UI.</li>
+            <li><strong>Event-Driven Architecture:</strong> System zdarzeń oparty na enum <code>GameEventType</code> (ENEMY_KILLED, TOWER_BUILT, etc.) i klasie <code>GameEvent</code> przesyłającej dane do Observerów.</li>
+            <li><strong>Pełny ekran:</strong> Wykorzystanie <code>GraphicsDevice.setFullScreenWindow()</code> dla trybu full-screen z automatycznym skalowaniem contentu.</li>
+        </ul>
+
+        <h2>3. Architektura Systemu</h2>
+        <div class="diagram-box">
+            <div class="mermaid">
+                classDiagram
+                    direction TB
+                    class Main {
+                        +main()
+                    }
+                    class GamePanel {
+                        +paintComponent()
+                    }
+                    class GameManager {
+                        &lt;&lt;Singleton&gt;&gt;
+                        +getInstance()
+                    }
+                    class TowerFactoryManager {
+                        &lt;&lt;Singleton&gt;&gt;
+                        +createTower()
+                    }
+                    class WaveManager {
+                        +update()
+                    }
+                    class EnemyCache {
+                        +getEnemy()
+                    }
+                    class GameObserver {
+                        &lt;&lt;interface&gt;&gt;
+                        +onGameEvent()
+                    }
+                    class ITower {
+                        &lt;&lt;interface&gt;&gt;
+                        +draw()
+                    }
+                    class Enemy {
+                        +update()
+                    }
+
+                    Main --> GamePanel : creates
+                    GamePanel --> GameManager : uses
+                    GamePanel --> TowerFactoryManager : uses
+                    GameManager --> WaveManager : manages
+                    GameManager --> GameObserver : notifies
+                    GameManager "1" o-- "*" ITower : contains
+                    GameManager "1" o-- "*" Enemy : contains
+                    WaveManager ..> EnemyCache : clones from
+            </div>
+        </div>
+
+        <div class="footer">Strona 1 z 7</div>
+    </div>
+
+    <!-- STRONA 2: SINGLETON & OBSERVER -->
+    <div class="page">
+        <h1>Wzorce 1 & 2: Singleton i Observer</h1>
+
+        <!-- SINGLETON -->
+        <h3>1. Singleton</h3>
+        <p><strong>Cel użycia:</strong> Gwarancja istnienia tylko jednej instancji kluczowych zarządców (GameManager, TowerFactoryManager) i globalny punkt dostępu do nich z dowolnego miejsca w kodzie.</p>
+        
+        <div class="roles-box">
+            <span class="roles-title"> Role w wzorcu Singleton:</span>
+            <div class="role-item"><span class="role-name">Singleton:</span> GameManager, TowerFactoryManager</div>
+            <div class="role-item"><span class="role-name">Instance (pole statyczne):</span> GameManager.instance, TowerFactoryManager.instance</div>
+            <div class="role-item"><span class="role-name">getInstance() (metoda dostępowa):</span> GameManager.getInstance(), TowerFactoryManager.getInstance()</div>
+            <div class="role-item"><span class="role-name">Konstruktor prywatny:</span> private GameManager(), private TowerFactoryManager()</div>
+            <div class="role-item"><span class="role-name">Client:</span> GamePanel, WaveManager, Main (wszyscy klienci wywołujący getInstance())</div>
+        </div>
+
+        <div class="usage-box">
+            <span class="usage-title"> Lokalizacja i użycie:</span>
+            <strong>Definicja:</strong> GameManager.java (linie 33-36), AllFactories.java (linie 111-116)<br>
+            <strong>Użycie:</strong><br>
+            • GamePanel.java (linie 11-13): Inicjalizacja referencji do singletonów.<br>
+            • WaveManager.java (linia 2): Pobranie instancji GameManager.<br>
+            • Tower.java (linia 28): Dostęp do listy wrogów przez GameManager.
+        </div>
+
+        <div class="vector-box">
+            <span class="vector-title"> Wektor zmian:</span>
+            Ułatwia dodawanie nowych globalnych usług (np. AudioManager, SaveManager) bez modyfikacji przekazywania referencji przez konstruktory. Nowe singletony można dodać bez zmiany istniejącego kodu.
+        </div>
+
+        <div class="diagram-box">
+            <div class="mermaid">
+                classDiagram
+                    class GameManager {
+                        -static instance: GameManager
+                        -GameManager()
+                        +static getInstance(): GameManager
+                        +money: int
+                        +lives: int
+                    }
+                    class TowerFactoryManager {
+                        -static instance: TowerFactoryManager
+                        -TowerFactoryManager()
+                        +static getInstance(): TowerFactoryManager
+                    }
+                    
+                    GameManager "1" -- "1" GameManager : instance
+                    TowerFactoryManager "1" -- "1" TowerFactoryManager : instance
+            </div>
+        </div>
+
+        <div class="mac-window">
+            <div class="mac-header">
+                <div class="dots"><div class="dot red"></div><div class="dot yellow"></div></div>
+                <div class="filename">src/GameManager.java (linie 33-36)</div>
+            </div>
+            <div class="code-content">
+<span class="kwd">public static</span> <span class="cls">GameManager</span> <span class="func">getInstance</span>() {
+    <span class="kwd">if</span> (instance == <span class="kwd">null</span>) instance = <span class="kwd">new</span> <span class="cls">GameManager</span>();
+    <span class="kwd">return</span> instance;
+}</div>
+        </div>
+
+        <!-- OBSERVER -->
+        <h3 style="border-top: 1px solid #eee; padding-top: 10px;">2. Observer</h3>
+        <p><strong>Cel użycia:</strong> Reakcja na zdarzenia gry (śmierć wroga, nowa fala, zmiana pieniędzy) w niezależnych modułach (Dźwięk, UI, Osiągnięcia, Logi) bez silnego wiązania kodu.</p>
+
+        <div class="roles-box">
+            <span class="roles-title"> Role w wzorcu Observer:</span>
+            <div class="role-item"><span class="role-name">Subject (Podmiot):</span> GameManager</div>
+            <div class="role-item"><span class="role-name">Observer (Interfejs obserwatora):</span> GameObserver</div>
+            <div class="role-item"><span class="role-name">ConcreteObserver:</span> StatisticsObserver, SoundObserver, AchievementObserver, LoggerObserver, GamePanel</div>
+            <div class="role-item"><span class="role-name">attach() (rejestracja):</span> GameManager.addObserver()</div>
+            <div class="role-item"><span class="role-name">notify() (powiadamianie):</span> GameManager.notifyObservers(GameEvent)</div>
+            <div class="role-item"><span class="role-name">Event (dane zdarzenia):</span> GameEvent z GameEventType</div>
+        </div>
+
+        <div class="usage-box">
+            <span class="usage-title"> Lokalizacja i użycie:</span>
+            <strong>Definicja:</strong> GameObserver.java (interfejs), AllObservers.java (concrete observers), GameEvent.java (enum + klasa)<br>
+            <strong>Użycie - rejestracja:</strong> Main.java (linie 27-30): dodawanie obserwatorów do GameManager.<br>
+            <strong>Użycie - powiadamianie:</strong><br>
+            • GameManager.takeDamage() (linie 66-75): powiadomienie o zmianie żyć.<br>
+            • GameManager.enemyKilled() (linie 77-79): powiadomienie o nagrodzie.<br>
+            • WaveManager.startWave() (linie 6-31): wywołanie metody waveStarted w linii 31.
+        </div>
+
+        <div class="diagram-box">
+            <div class="mermaid">
+                classDiagram
+                    class GameObserver {
+                        &lt;&lt;interface&gt;&gt;
+                        +onGameEvent(event: GameEvent)
+                    }
+                    class GameManager {
+                        -observers: List~GameObserver~
+                        +addObserver(o: GameObserver)
+                        +notifyObservers(event: GameEvent)
+                    }
+                    class StatisticsObserver {
+                        +onGameEvent(event: GameEvent)
+                    }
+                    class SoundObserver {
+                        +onGameEvent(event: GameEvent)
+                    }
+                    class AchievementObserver {
+                        +onGameEvent(event: GameEvent)
+                    }
+
+                    GameManager o-- GameObserver
+                    GameObserver <|.. StatisticsObserver
+                    GameObserver <|.. SoundObserver
+                    GameObserver <|.. AchievementObserver
+            </div>
+        </div>
+
+        <div class="footer">Strona 2 z 7</div>
+    </div>
+
+    <!-- STRONA 3: FACTORY METHOD -->
+    <div class="page">
+        <h1>Wzorzec 3: Factory Method</h1>
+        
+        <h2>Cel użycia</h2>
+        <p>Oddzielenie procesu tworzenia obiektów (wież) od miejsca ich użycia. Pozwala na dodawanie nowych typów wież poprzez dodanie nowej fabryki, bez modyfikacji kodu klienta (GamePanel).</p>
+
+        <div class="roles-box">
+            <span class="roles-title"> Role w wzorcu Factory Method:</span>
+            <div class="role-item"><span class="role-name">Creator (abstrakcyjna fabryka):</span> TowerFactoryBase</div>
+            <div class="role-item"><span class="role-name">ConcreteCreator (konkretne fabryki):</span> ArcherFactory, CannonFactory, SniperFactory, LaserFactory</div>
+            <div class="role-item"><span class="role-name">Product (interfejs produktu):</span> ITower</div>
+            <div class="role-item"><span class="role-name">ConcreteProduct (konkretny produkt):</span> Tower</div>
+            <div class="role-item"><span class="role-name">factoryMethod() (metoda fabrykująca):</span> createTower(int x, int y)</div>
+            <div class="role-item"><span class="role-name">Client (klient fabryki):</span> TowerFactoryManager, GamePanel</div>
+        </div>
+
+        <div class="usage-box">
+            <span class="usage-title"> Lokalizacja i użycie:</span>
+            <strong>Definicja:</strong> AllFactories.java<br>
+            • TowerFactoryBase (linie 6-31) - klasa abstrakcyjna.<br>
+            • Konkretne fabryki: Archer (34-49), Cannon (52-67), Sniper (70-85), Laser (88-103).<br>
+            • TowerFactoryManager (linie 107-160) - zarządza fabrykami.<br>
+            <strong>Użycie:</strong><br>
+            • GamePanel.handleClick() (linie 190-200): tworzenie wieży wybranego typu.<br>
+            • TowerFactoryManager.registerDefaultFactories() (linie 120-125): rejestracja dostępnych fabryk.
+        </div>
+
+        <div class="diagram-box">
+            <div class="mermaid">
+                classDiagram
+                    class TowerFactoryBase {
+                        &lt;&lt;abstract&gt;&gt;
+                        +createTower(x: int, y: int): ITower
+                        #getTowerName(): String
+                    }
+                    class ArcherFactory {
+                        +createTower(): ITower
+                    }
+                    class CannonFactory {
+                        +createTower(): ITower
+                    }
+                    class TowerFactoryManager {
+                        -factories: Map~String, TowerFactoryBase~
+                        +createTower(type: String): ITower
+                    }
+                    class ITower { 
+                        &lt;&lt;interface&gt;&gt;
+                    }
+                    
+                    TowerFactoryBase <|-- ArcherFactory
+                    TowerFactoryBase <|-- CannonFactory
+                    TowerFactoryManager o-- TowerFactoryBase
+                    TowerFactoryBase ..> ITower : creates
+            </div>
+        </div>
+
+        <div class="vector-box">
+            <span class="vector-title"> Wektor zmian:</span>
+            Dodanie nowej wieży (np. FlameThrowerFactory) wymaga tylko: (1) stworzenia klasy extends TowerFactoryBase, (2) zarejestrowania w TowerFactoryManager.registerDefaultFactories(). Manager automatycznie obsłuży nowy typ bez zmian w GamePanel.
+        </div>
+
+        <div class="mac-window">
+            <div class="mac-header">
+                <div class="dots"><div class="dot red"></div><div class="dot yellow"></div></div>
+                <div class="filename">src/AllFactories.java (linie 52-67)</div>
+            </div>
+            <div class="code-content">
+<span class="kwd">class</span> <span class="cls">CannonFactory</span> <span class="kwd">extends</span> <span class="cls">TowerFactoryBase</span> {
+    <span class="kwd">@Override</span>
+    <span class="kwd">public</span> <span class="cls">ITower</span> <span class="func">createTower</span>(<span class="kwd">int</span> x, <span class="kwd">int</span> y) {
+        <span class="kwd">return new</span> <span class="cls">Tower</span>(x, y, <span class="func">getTowerName</span>(), 
+            <span class="func">getBaseRange</span>(), <span class="func">getCooldown</span>(), 
+            <span class="func">getBaseDamage</span>(), <span class="func">getTowerColor</span>());
+    }
+
+    <span class="kwd">@Override</span>
+    <span class="kwd">protected</span> <span class="cls">String</span> <span class="func">getTowerName</span>() { <span class="kwd">return</span> <span class="str">"Armata"</span>; }
+    <span class="kwd">@Override</span>
+    <span class="kwd">protected int</span> <span class="func">getBaseDamage</span>() { <span class="kwd">return</span> <span class="num">60</span>; }
+}</div>
+        </div>
+
+        <div class="footer">Strona 3 z 7</div>
+    </div>
+
+    <!-- STRONA 4: DECORATOR -->
+    <div class="page">
+        <h1>Wzorzec 4: Decorator</h1>
+        
+        <h2>Cel użycia</h2>
+        <p>Dynamiczne dodawanie funkcjonalności (ulepszenia statystyk, zmiana wyglądu) do obiektów wież w trakcie działania programu, bez konieczności tworzenia wielu podklas dziedziczących.</p>
+
+        <div class="roles-box">
+            <span class="roles-title"> Role w wzorcu Decorator:</span>
+            <div class="role-item"><span class="role-name">Component (interfejs komponentu):</span> ITower</div>
+            <div class="role-item"><span class="role-name">ConcreteComponent (bazowy komponent):</span> Tower</div>
+            <div class="role-item"><span class="role-name">Decorator (abstrakcyjny dekorator):</span> TowerDecorator</div>
+            <div class="role-item"><span class="role-name">ConcreteDecorator:</span> DamageUpgradeDecorator, RangeUpgradeDecorator, FireRateUpgradeDecorator</div>
+            <div class="role-item"><span class="role-name">wrappedTower (opakowywany obiekt):</span> pole protected ITower wrappedTower w TowerDecorator</div>
+            <div class="role-item"><span class="role-name">Client:</span> GamePanel.applyUpgrade() (tworzy dekoratory)</div>
+        </div>
+
+        <div class="usage-box">
+            <span class="usage-title"> Lokalizacja i użycie:</span>
+            <strong>Definicja:</strong> TowerDecorators.java<br>
+            • TowerDecorator (linie 6-17) - bazowy dekorator<br>
+            • Konkretne dekoratory: Damage (19-35), Range (37-52), FireRate (55-78)<br>
+            <strong>Użycie:</strong><br>
+            • GamePanel.applyUpgrade() (linie 275-312): tworzenie dekoratorów na podstawie wyboru gracza.<br>
+            • GamePanel.handleClick() (linie 180-185): wykrywanie kliknięcia PPM na wieży i otwieranie menu.
+        </div>
+
+        <div class="diagram-box">
+            <div class="mermaid">
+                classDiagram
+                    class ITower {
+                        &lt;&lt;interface&gt;&gt;
+                        +getDamage(): int
+                        +getRange(): int
+                        +draw(g: Graphics2D)
+                    }
+                    class Tower {
+                        +damage: int
+                        +getDamage(): int
+                    }
+                    class TowerDecorator {
+                        &lt;&lt;abstract&gt;&gt;
+                        #wrappedTower: ITower
+                        +getDamage(): int
+                    }
+                    class DamageUpgradeDecorator {
+                        +getDamage(): int
+                        +draw(g: Graphics2D)
+                    }
+                    class RangeUpgradeDecorator {
+                        +getRange(): int
+                        +draw(g: Graphics2D)
+                    }
+                    class FireRateUpgradeDecorator {
+                        +update()
+                        +draw(g: Graphics2D)
+                    }
+                    
+                    ITower <|.. Tower
+                    ITower <|.. TowerDecorator
+                    TowerDecorator o-- ITower : wraps
+                    TowerDecorator <|-- DamageUpgradeDecorator
+                    TowerDecorator <|-- RangeUpgradeDecorator
+                    TowerDecorator <|-- FireRateUpgradeDecorator
+            </div>
+        </div>
+
+        <div class="vector-box">
+            <span class="vector-title"> Wektor zmian:</span>
+            Pozwala na łatwe tworzenie nowych typów ulepszeń (np. PoisonDecorator, SlowDecorator) lub tymczasowych efektów (buffów) poprzez "opakowywanie" obiektów. Można łączyć dekoratory (np. wieża z +damage i +range jednocześnie).
+        </div>
+
+        <div class="mac-window">
+            <div class="mac-header">
+                <div class="dots"><div class="dot red"></div><div class="dot yellow"></div></div>
+                <div class="filename">src/TowerDecorators.java (linie 19-33)</div>
+            </div>
+            <div class="code-content">
+<span class="kwd">class</span> <span class="cls">DamageUpgradeDecorator</span> <span class="kwd">extends</span> <span class="cls">TowerDecorator</span> {
+    <span class="kwd">public</span> <span class="func">DamageUpgradeDecorator</span>(<span class="cls">ITower</span> tower) { 
+        <span class="kwd">super</span>(tower); 
+    }
+
+    <span class="kwd">@Override</span>
+    <span class="kwd">public int</span> <span class="func">getDamage</span>() {
+        <span class="com">// Bazowe obrażenia + bonus 25</span>
+        <span class="kwd">return</span> wrappedTower.<span class="func">getDamage</span>() + <span class="num">25</span>;
+    }
+
+    <span class="kwd">@Override</span>
+    <span class="kwd">public void</span> <span class="func">draw</span>(<span class="cls">Graphics2D</span> g) {
+        wrappedTower.<span class="func">draw</span>(g);
+        <span class="com">// Złota ramka jako wizualny wskaźnik ulepszenia</span>
+        g.<span class="func">setColor</span>(<span class="kwd">new</span> <span class="cls">Color</span>(<span class="num">255</span>, <span class="num">215</span>, <span class="num">0</span>));
+        g.<span class="func">drawRect</span>(<span class="func">getX</span>() - <span class="num">15</span>, <span class="func">getY</span>() - <span class="num">15</span>, <span class="num">30</span>, <span class="num">30</span>);
+    }
+}</div>
+        </div>
+
+        <div class="footer">Strona 4 z 7</div>
+    </div>
+
+    <!-- STRONA 5: PROTOTYPE -->
+    <div class="page">
+        <h1>Wzorzec 5: Prototype</h1>
+        
+        <h2>Cel użycia</h2>
+        <p>Optymalizacja tworzenia wielu obiektów przeciwników o podobnych parametrach. Definicje wrogów są ładowane raz do pamięci podręcznej (Cache), a następnie klonowane zamiast wielokrotnie tworzone przez konstruktor.</p>
+
+        <div class="roles-box">
+            <span class="roles-title"> Role w wzorcu Prototype:</span>
+            <div class="role-item"><span class="role-name">Prototype (interfejs prototypu):</span> interface Prototype extends Cloneable</div>
+            <div class="role-item"><span class="role-name">ConcretePrototype (konkretny prototyp):</span> Enemy</div>
+            <div class="role-item"><span class="role-name">clone() (metoda klonująca):</span> Enemy.clone() (nadpisuje Prototype.clone())</div>
+            <div class="role-item"><span class="role-name">PrototypeRegistry (rejestr prototypów):</span> EnemyCache</div>
+            <div class="role-item"><span class="role-name">Client:</span> WaveManager.update() (pobiera sklonowane obiekty)</div>
+        </div>
+
+        <div class="usage-box">
+            <span class="usage-title"> Lokalizacja i użycie:</span>
+            <strong>Definicja:</strong><br>
+            • Prototype.java (interfejs).<br>
+            • Enemy.java (linie 20-23): implementacja clone().<br>
+            • EnemyCache.java: cache prototypów i metoda getEnemy().<br>
+            <strong>Użycie:</strong><br>
+            • Main.java (linia 13): EnemyCache.loadCache().<br>
+            • WaveManager.update() (linie 39-42): pobranie sklonowanego wroga.<br>
+            • WaveManager.selectEnemyType() (linie 68-91): wybór typu wroga.
+        </div>
+
+        <div class="diagram-box">
+            <div class="mermaid">
+                classDiagram
+                    class Prototype {
+                        &lt;&lt;interface&gt;&gt;
+                        +clone(): Prototype
+                    }
+                    class Enemy {
+                        +hp: int
+                        +speed: double
+                        +clone(): Prototype
+                    }
+                    class EnemyCache {
+                        -static cache: Map~String, Enemy~
+                        +static loadCache()
+                        +static getEnemy(type: String): Enemy
+                    }
+                    class WaveManager {
+                        +update()
+                        -selectEnemyType(): String
+                    }
+                    
+                    Prototype <|.. Enemy
+                    EnemyCache o-- Enemy : stores
+                    WaveManager ..> EnemyCache : uses
+            </div>
+        </div>
+
+        <div class="vector-box">
+            <span class="vector-title"> Wektor zmian:</span>
+            Dodanie nowych typów przeciwników wymaga tylko rozszerzenia EnemyCache.loadCache() o nową definicję. Można tworzyć warianty sezonowe (zimowe, letnie) bez duplikacji kodu. System łatwo rozszerzalny o system "modów" gry z różnymi zestawami wrogów.
+        </div>
+
+        <div class="mac-window">
+            <div class="mac-header">
+                <div class="dots"><div class="dot red"></div><div class="dot yellow"></div></div>
+                <div class="filename">src/EnemyCache.java (linie 20-26)</div>
+            </div>
+            <div class="code-content">
+<span class="kwd">public static</span> <span class="cls">Enemy</span> <span class="func">getEnemy</span>(<span class="cls">String</span> type) {
+    <span class="cls">Enemy</span> prototype = cache.<span class="func">get</span>(type);
+    <span class="kwd">if</span> (prototype == <span class="kwd">null</span>) {
+        prototype = cache.<span class="func">get</span>(<span class="str">"NORMAL"</span>); <span class="com">// Fallback</span>
+    }
+    <span class="kwd">return</span> (<span class="cls">Enemy</span>) prototype.<span class="func">clone</span>();
+}</div>
+        </div>
+
+        <div class="footer">Strona 5 z 7</div>
+    </div>
+
+    <!-- STRONA 6: COMMAND -->
+    <div class="page">
+        <h1>Wzorzec 6: Command</h1>
+        
+        <h2>Cel użycia</h2>
+        <p>Enkapsulacja akcji użytkownika (kupno wieży, start fali) w obiekty komend. Ułatwia to obsługę GUI, pozwala na parametryzację przycisków i umożliwia łatwe rozszerzenie o funkcje undo/redo.</p>
+
+        <div class="roles-box">
+            <span class="roles-title"> Role w wzorcu Command:</span>
+            <div class="role-item"><span class="role-name">Command (interfejs komendy):</span> IGameCommand</div>
+            <div class="role-item"><span class="role-name">ConcreteCommand (konkretne komendy):</span> BuyTowerCommand, StartWaveCommand</div>
+            <div class="role-item"><span class="role-name">execute() (metoda wykonująca):</span> IGameCommand.execute()</div>
+            <div class="role-item"><span class="role-name">Receiver (odbiorcy):</span> GamePanel (dla BuyTowerCommand), WaveManager (dla StartWaveCommand)</div>
+            <div class="role-item"><span class="role-name">Invoker (wywoływacz):</span> GamePanel.handleClick() - wykonuje komendy z mapy commands</div>
+            <div class="role-item"><span class="role-name">Client (konfiguruje komendy):</span> GamePanel konstruktor (linie 69-79)</div>
+        </div>
+
+        <div class="usage-box">
+            <span class="usage-title"> Lokalizacja i użycie:</span>
+            <strong>Definicja:</strong><br>
+            • IGameCommand.java (interfejs)<br>
+            • BuyTowerCommand.java (linie 1-13)<br>
+            • StartWaveCommand.java (linie 1-6)<br>
+            <strong>Użycie - konfiguracja:</strong><br>
+            • GamePanel konstruktor (linie 69-79): mapowanie przycisków do komend.<br>
+            <strong>Użycie - wykonanie:</strong><br>
+            • GamePanel.handleClick() (linie 167-175): pętla wykonująca komendę przypisaną do przycisku.
+        </div>
+
+        <div class="diagram-box">
+            <div class="mermaid">
+                classDiagram
+                    class IGameCommand {
+                        &lt;&lt;interface&gt;&gt;
+                        +execute()
+                    }
+                    class BuyTowerCommand {
+                        -panel: GamePanel
+                        -type: String
+                        -cost: int
+                        +execute()
+                    }
+                    class StartWaveCommand {
+                        -wm: WaveManager
+                        +execute()
+                    }
+                    class GamePanel {
+                        -commands: Map~Rectangle, IGameCommand~
+                        +handleClick(e: MouseEvent)
+                    }
+                    class WaveManager {
+                        +startWave()
+                    }
+                    
+                    IGameCommand <|.. BuyTowerCommand
+                    IGameCommand <|.. StartWaveCommand
+                    GamePanel o-- IGameCommand : stores
+                    BuyTowerCommand --> GamePanel : uses
+                    StartWaveCommand --> WaveManager : uses
+            </div>
+        </div>
+
+        <div class="vector-box">
+            <span class="vector-title"> Wektor zmian:</span>
+            Łatwe dodawanie nowych akcji UI (np. SellTowerCommand, PausGameCommand) bez modyfikacji logiki obsługi kliknięć. Możliwość implementacji historii komend dla undo/redo. Komendy można serializować i zapisywać (replay system).
+        </div>
+
+        <div class="mac-window">
+            <div class="mac-header">
+                <div class="dots"><div class="dot red"></div><div class="dot yellow"></div></div>
+                <div class="filename">src/BuyTowerCommand.java</div>
+            </div>
+            <div class="code-content">
+<span class="kwd">class</span> <span class="cls">BuyTowerCommand</span> <span class="kwd">implements</span> <span class="cls">IGameCommand</span> {
+    <span class="kwd">private</span> <span class="cls">GamePanel</span> panel;
+    <span class="kwd">private</span> <span class="cls">String</span> type;
+    <span class="kwd">private int</span> cost, range;
+
+    <span class="kwd">public</span> <span class="func">BuyTowerCommand</span>(<span class="cls">GamePanel</span> panel, <span class="cls">String</span> type, 
+                              <span class="kwd">int</span> cost, <span class="kwd">int</span> range) {
+        <span class="kwd">this</span>.panel = panel; 
+        <span class="kwd">this</span>.type = type; 
+        <span class="kwd">this</span>.cost = cost; 
+        <span class="kwd">this</span>.range = range;
+    }
+
+    <span class="kwd">@Override</span>
+    <span class="kwd">public void</span> <span class="func">execute</span>() {
+        <span class="com">// Ustawia wybraną wieżę w panelu</span>
+        panel.<span class="func">setSelectedTower</span>(type, cost, range);
+    }
+}</div>
+        </div>
+
+        <div class="footer">Strona 6 z 7</div>
+    </div>
+
+    <!-- STRONA 7: INSTRUKCJE -->
+    <div class="page">
+        <h1>Instrukcje</h1>
+
+        <h2>Instrukcja Użytkownika</h2>
+        <p><strong>Cel gry:</strong> Przetrwanie 20 fal przeciwników poprzez budowanie i ulepszanie wież obronnych. Wrogowie podążają ustaloną ścieżką - jeśli dotrą do końca, tracisz życie.</p>
+        
+        <h3>Sterowanie i Interfejs:</h3>
+        <ul>
+            <li><strong>LPM (Lewy Przycisk Myszy):</strong> Wybór wieży ze sklepu (dół ekranu) i postawienie jej na mapie. Pole musi być wolne (nie może być ścieżką ani inną wieżą).</li>
+            <li><strong>PPM (Prawy Przycisk Myszy):</strong> Kliknięcie na istniejącą wieżę otwiera <strong>Menu Ulepszeń</strong> z trzema opcjami:
+                <ul>
+                    <li> Atak (+25 damage) - 100$</li>
+                    <li> Zasięg (+50 range) - 80$</li>
+                    <li> Szybkość (4x fire rate) - 120$</li>
+                </ul>
+            </li>
+            <li><strong>Przycisk "START WAVE":</strong> Rozpoczyna kolejną falę wrogów (dostępny tylko w fazie przygotowawczej).</li>
+        </ul>
+
+        <h3>Typy Wież:</h3>
+        <ul>
+            <li><strong> Łucznik (50$):</strong> Szybka wieża podstawowa (damage: 25, range: 120, cooldown: 600ms)</li>
+            <li><strong> Armata (120$):</strong> Silne pojedyncze strzały (damage: 60, range: 150, cooldown: 1500ms)</li>
+            <li><strong> Snajper (250$):</strong> Długi zasięg, wolny ogień (damage: 150, range: 300, cooldown: 2500ms)</li>
+            <li><strong> Laser (80$):</strong> Bardzo szybkie, słabe strzały (damage: 15, range: 100, cooldown: 300ms)</li>
+        </ul>
+
+        <h3>Skróty Klawiszowe:</h3>
+        <ul>
+            <li><code>S</code> - Włącz/Wyłącz panel statystyk (zabici wrogowie, wydane pieniądze, najwyższa fala).</li>
+            <li><code>L</code> - Włącz/Wyłącz logi systemowe (historia zdarzeń w grze).</li>
+            <li><code>M</code> - Wycisz/Włącz dźwięk (symulowane w konsoli).</li>
+            <li><code>A</code> - Pokaż panel osiągnięć (9 osiągnięć do odblokowania).</li>
+            <li><code>ESC</code> - Wyjście z gry.</li>
+        </ul>
+
+        <div class="vector-box" style="background-color: #e8f5e9; border-left-color: #00b894;">
+            <span class="vector-title" style="color: #00b894;"> Nowość - Zimowa Mapa:</span>
+            Od 11 fali mapa zmienia się na zimową z nowym tłem i nowymi przeciwnikami:
+            <ul style="margin: 5px 0 0 0;">
+                <li><strong> Ice:</strong> Podstawowy zimowy wróg (HP: 120, speed: 1.8)</li>
+                <li><strong> Frost Giant:</strong> Lodowy olbrzym (HP: 500, speed: 0.7) - pojawia się od fali 15</li>
+                <li><strong> Blizzard:</strong> Szybki mały wróg (HP: 60, speed: 4.2)</li>
+            </ul>
+        </div>
+
+        <h2>Instrukcja Instalacji</h2>
+        
+        <h3>Wymagania:</h3>
+        <ul>
+            <li>Zainstalowane środowisko <strong>Java Runtime Environment (JRE)</strong> w wersji <strong>17 lub nowszej</strong>.</li>
+            <li>System operacyjny: Windows 10/11, macOS 10.14+, lub Linux z GUI.</li>
+            <li>Rozdzielczość ekranu: minimum 1280x720 (zalecane 1920x1080).</li>
+        </ul>
+
+        <h3>Kompilacja ze źródeł (opcjonalna):</h3>
+        <div class="mac-window" style="margin: 5px 0;">
+            <div class="code-content" style="padding: 5px 10px;">javac -d bin src/*.java
+java -cp bin Main</div>
+        </div>
+
+        <h3>Uruchomienie z pliku JAR:</h3>
+        <ol>
+            <li>Pobierz plik <code>TowerDefense.jar</code>.</li>
+            <li>Uruchom terminal (konsolę) w folderze z grą.</li>
+            <li>Wpisz komendę:
+                <div class="mac-window" style="margin: 5px 0;">
+                    <div class="code-content" style="padding: 5px 10px;">java -jar TowerDefense.jar</div>
+                </div>
+            </li>
+            <li>Alternatywnie: Kliknij dwukrotnie plik .jar (jeśli skojarzenia plików są poprawne).</li>
+        </ol>
+
+        <p style="margin-top: 15px;"><strong>Uwaga:</strong> Gra uruchamia się w trybie pełnoekranowym. Użyj ESC aby wyjść.</p>
+
+        <div class="footer">Strona 7 z 7</div>
+    </div>
+
+    <script>
+        mermaid.initialize({ 
+            startOnLoad: true, 
+            theme: 'neutral',
+            securityLevel: 'loose',
+            flowchart: { curve: 'basis' }
+        });
+    </script>
+</body>
+</html>
